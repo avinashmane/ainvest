@@ -120,24 +120,21 @@ if "team" not in st.session_state:
 
 
 # --- Sidebar ---
+import yaml
+from textwrap import dedent
 from components.sidebar import sidebar
 with st.sidebar:
     sidebar(initialize_team)
 
 # --- Streamlit UI ---
 st.title("🤑 Investment Assistant Team")
-st.markdown("""
-### This team coordinates specialists to assist with request like:
-```
-Latest news on Microsoft along with negative sentiment italics in markdown
-```
-```
-Get me current price of Reliance
-```
-```
-5 day chart for Reliance
-```
-""")
+with st.container(horizontal=True):
+    samples=yaml.safe_load(dedent("""
+    - Latest news on Microsoft along with negative sentiment italics in markdown
+    - Get me current price of Reliance
+    - 5 day chart for Reliance
+    """))
+    for s in samples: st.code(s) 
 
 
 # Display chat messages from history
@@ -168,9 +165,9 @@ if user_query:
 
             for i,run_event in enumerate(response_stream):
                 # Check if content is present and a string
-                print(f"{i}> ",run_event)
+                # print(f"{i}> ",run_event)
                 if run_event.content and isinstance(run_event.content, str):
-                    if run_event.event in ['RunContent','TeamRunContent']:
+                    if run_event.event in ['RunContent','TeamRun-Content']:
                         full_response += run_event.content
                         message_placeholder.markdown(full_response + "▌") # Add cursor effect
                     else:

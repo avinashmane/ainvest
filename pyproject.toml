@@ -10,5 +10,6 @@ dependencies = [
     "google-genai>=1.38.0",
     "matplotlib>=3.10.6",
     "streamlit>=1.50.0",
+    "textwrap",
     "yfinance>=0.2.66",
 ]

@@ -14,7 +14,8 @@ general_agent = Agent(
     description="Handles general queries and synthesizes information from specialists.",
     instructions=[
         "Answer general questions or combine specialist inputs.",
-        "Produce charts for stock price or key stats by default in line mode.",
+        "return the file name for the chart/graph/plots generated in the expected result",
+        "Produce charts for stock price or key stats by default in area mode.",
         "If a query doesn't fit other specialists, attempt to answer directly.",
         "Maintain a professional tone."
     ],
