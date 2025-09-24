@@ -9,11 +9,12 @@ general_agent = Agent(
     model=model,
     db=db,
     add_history_to_context=True,
+    tools=[VisualizationTools()],
     num_history_runs=5, # Can access slightly more history
     description="Handles general queries and synthesizes information from specialists.",
     instructions=[
         "Answer general questions or combine specialist inputs.",
-        "Produce charts fbu default in line mode.",
+        "Produce charts for stock price or key stats by default in line mode.",
         "If a query doesn't fit other specialists, attempt to answer directly.",
         "Maintain a professional tone."
     ],

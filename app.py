@@ -3,7 +3,7 @@ import os
 import streamlit as st
 from dotenv import load_dotenv
 import time
-from pprint import pformat
+from rich import print
 from typing import Iterator # Added for type hinting
 
 # Agno Imports
@@ -116,31 +116,41 @@ def initialize_team():
 
 if "team" not in st.session_state:
     st.session_state.team = initialize_team()
+    st.session_state.log = []
 
+
+# --- Sidebar ---
+from components.sidebar import sidebar
+with st.sidebar:
+    sidebar(initialize_team)
 
 # --- Streamlit UI ---
 st.title("🤑 Investment Assistant Team")
 st.markdown("""
-This team coordinates specialists to assist with:
-- 🔍 Web searches
-- 📈 Stock Market
-- 🧠 General queries and synthesis
+### This team coordinates specialists to assist with request like:
+```
+Latest news on Microsoft along with negative sentiment italics in markdown
+```
+```
+Get me current price of Reliance
+```
+```
+5 day chart for Reliance
+```
 """)
-# - 🌐 Website content extraction
-# - 📺 YouTube video analysis
-# - 📧 Email drafting/sending
-# - 💻 GitHub repository exploration
-# - 📰 Hacker News trends
+
 
 # Display chat messages from history
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
+
 # Handle user input
 user_query = st.chat_input("Ask the investment team anything...")
 
 if user_query:
+    print(user_query)
     # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": user_query})
 
@@ -156,11 +166,17 @@ if user_query:
             # Use stream=True for the team run
             response_stream: RunOutput = st.session_state.team.run(user_query, stream=True) # Ensure type hint Iterator[RunResponse]
 
-            for chunk in response_stream:
+            for i,run_event in enumerate(response_stream):
                 # Check if content is present and a string
-                if chunk.content and isinstance(chunk.content, str):
-                    full_response += chunk.content
-                    message_placeholder.markdown(full_response + "▌") # Add cursor effect
+                print(f"{i}> ",run_event)
+                if run_event.content and isinstance(run_event.content, str):
+                    if run_event.event in ['RunContent','TeamRunContent']:
+                        full_response += run_event.content
+                        message_placeholder.markdown(full_response + "▌") # Add cursor effect
+                    else:
+                        if hasattr(st.session_state,'log'): st.session_state.log.append(run_event)
+                        else: st.session_state.log=[run_event]
+
             message_placeholder.markdown(full_response) # Final response without cursor
 
             # Update memory debug information for display
@@ -188,54 +204,4 @@ if user_query:
             # Add error message to history for context
             st.session_state.messages.append({"role": "assistant", "content": f"Error: {str(e)}"})
 
-# --- Sidebar ---
-with st.sidebar:
-    st.title("Team Settings")
 
-    # Memory debug section
-    if st.checkbox("Show Team Memory Contents", value=False):
-        st.subheader("Team Memory Contents (Debug)")
-        if "memory_dump" in st.session_state:
-            try:
-                # Use pformat for potentially complex structures
-                memory_str = pformat(st.session_state.memory_dump, indent=2, width=80)
-                st.code(memory_str, language="python")
-            except Exception as format_e:
-                st.warning(f"Could not format memory dump: {format_e}")
-                st.json(st.session_state.memory_dump) # Fallback to json
-        else:
-            st.info("No memory contents to display yet. Interact with the team first.")
-
-    st.markdown(f"**Session ID**: `{st.session_state.team_session_id}`")
-    st.markdown(f"**Model**: {os.getenv("MODEL")}")
-
-    # Memory information
-    st.subheader("Team Memory")
-    st.markdown("This team remembers conversations within this browser session. Clearing the chat resets the memory.")
-
-    # Clear chat button
-    if st.button("Clear Chat & Reset Team"):
-        st.session_state.messages = []
-        st.session_state.team_session_id = f"streamlit-team-session-{int(time.time())}" # New ID for clarity
-        st.session_state.team = initialize_team() # Re-initialize the team to reset its state
-        if "memory_dump" in st.session_state:
-            del st.session_state.memory_dump # Clear the dump
-        st.rerun()
-
-    st.title("About")
-    st.markdown("""
-    **How it works**:
-    - The team coordinator analyzes your query.
-    - Tasks are delegated to specialists (Searcher, YahooFinance, General).
-    - Responses are synthesized into a final answer.
-    - Team memory retains context within this session.
-
-    **Example queries**:
-    - "What are the latest AI breakthroughs?"
-    - "Crawl agno.com and summarize the homepage."
-    - "Summarize the YouTube video: https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-    - "Draft an email to contact@example.com introducing our research services."
-    - "Find popular AI repositories on GitHub created in the last month."
-    - "What's trending on Hacker News today?"
-    - "What was the first question I asked you?" (tests memory)
-    """)

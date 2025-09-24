@@ -8,6 +8,7 @@ dependencies = [
     "agno>=2.0.8",
     "ddgs>=9.6.0",
     "google-genai>=1.38.0",
+    "matplotlib>=3.10.6",
     "streamlit>=1.50.0",
     "yfinance>=0.2.66",
 ]
