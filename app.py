@@ -70,6 +70,8 @@ from agents.yfinance import yfinance_agent
 # --- Team Initialization (in Session State) ---
 def initialize_team():
     """Initializes or re-initializes the investment team."""
+    st.session_state.log = []
+
     return Team(
         name="InvestmentAssistantTeam",
         role="coordinate",
@@ -116,7 +118,7 @@ def initialize_team():
 
 if "team" not in st.session_state:
     st.session_state.team = initialize_team()
-    st.session_state.log = []
+
 
 
 # --- Sidebar ---
@@ -127,7 +129,7 @@ with st.sidebar:
     sidebar(initialize_team)
 
 # --- Streamlit UI ---
-st.title("🤑 Investment Assistant Team")
+st.title("🤑 Assistant for Investments")
 with st.container(horizontal=True):
     samples=yaml.safe_load(dedent("""
     - Latest news on Microsoft along with negative sentiment italics in markdown
