@@ -1,5 +1,5 @@
 from lib.model import model
-
+from lib.database import db
 from agno.agent import Agent
 from agno.tools.duckduckgo import DuckDuckGoTools
 
@@ -7,6 +7,7 @@ from agno.tools.duckduckgo import DuckDuckGoTools
 search_agent = Agent(
     name="InternetSearcher",
     model=model,
+    db=db,
     tools=[DuckDuckGoTools(enable_search=True, enable_news=False)],
     add_history_to_context=True,
     num_history_runs=3, # Limit history passed to agent

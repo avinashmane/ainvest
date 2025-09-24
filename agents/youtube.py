@@ -1,4 +1,4 @@
-from app.app import model
+from app import model
 
 
 from agno.agent import Agent

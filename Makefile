@@ -1,2 +1,2 @@
 dev:
-	dotenv run uv run streamlit run app/app.py
+	dotenv run uv run streamlit run app.py --server.headless true
