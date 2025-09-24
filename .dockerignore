@@ -1,0 +1,13 @@
+.venv
+.DS_Store
+**/*.pyc
+**/*.backup
+**/*.log
+**/*.tmp
+**/tmp/
+.env
+Dockerfile
+.dockerignore
+.git
+.gitignore
+README.md
