@@ -1,13 +1,18 @@
-.venv
-.DS_Store
-**/*.pyc
-**/*.backup
-**/*.log
-**/*.tmp
-**/tmp/
-.env
-Dockerfile
-.dockerignore
+# Git
 .git
 .gitignore
-README.md
+
+# Python
+.venv
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDEs and editors
+.idea/
+.vscode/
+
+# Other
+.python-version
+uv.lock
