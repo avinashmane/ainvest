@@ -57,8 +57,6 @@ def sidebar(initialize_team):
         - "What are the latest AI breakthroughs?"
         - "Crawl agno.com and summarize the homepage."
         - "Summarize the YouTube video: https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-        - "Draft an email to contact@example.com introducing our research services."
-        - "Find popular AI repositories on GitHub created in the last month."
-        - "What's trending on Hacker News today?"
         - "What was the first question I asked you?" (tests memory)
+                    
         """)

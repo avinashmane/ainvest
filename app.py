@@ -98,7 +98,10 @@ def initialize_team():
             # "- GitHub queries: GitHubResearcher",
             # "- Hacker News: HackerNewsMonitor",
             "- Finance new, Stock quote, Share information: yfinance"
-            "- General or synthesis: GeneralAssistant",
+            "- General or chart: GeneralAssistant",
+            "if file path is program starting with charts, please show it as image",
+            "Positive tentiment to be shown in green and negative with red",
+            "Colored text and background colors for text, using the syntax :color[text to be colored] "
             "Synthesize responses into a cohesive answer.",
             "Cite sources and maintain clarity.",
             "Always check previous conversations in memory before responding.",
@@ -169,7 +172,7 @@ if user_query:
                 # Check if content is present and a string
                 # print(f"{i}> ",run_event)
                 if run_event.content and isinstance(run_event.content, str):
-                    if run_event.event in ['RunContent','TeamRun-Content']:
+                    if run_event.event in ['Run-Content','TeamRunContent']:
                         full_response += run_event.content
                         message_placeholder.markdown(full_response + "▌") # Add cursor effect
                     else:
