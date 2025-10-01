@@ -2,8 +2,12 @@ import streamlit as st
 from pprint import pformat
 import os
 import time
+from app.components.login import show_login
 
 def sidebar(initialize_team):
+    
+    show_login()
+
     st.title("Team Settings")
     tabs=st.tabs(['Settings','About'],width='stretch')
     with tabs[0]:
@@ -60,3 +64,4 @@ def sidebar(initialize_team):
         - "What was the first question I asked you?" (tests memory)
                     
         """)
+

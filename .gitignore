@@ -12,6 +12,7 @@ charts/
 # Virtual environments
 .venv
 
-# Environments
+# Environments/secrets
+.streamlit/**
 .env
 !.env.*

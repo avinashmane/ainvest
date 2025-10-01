@@ -1,5 +1,5 @@
-from app import model
-
+from lib.model import get_model
+model=get_model()
 
 from agno.agent import Agent
 from agno.tools.hackernews import HackerNewsTools

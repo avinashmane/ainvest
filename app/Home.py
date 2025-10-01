@@ -1,0 +1,89 @@
+# app.py
+import os
+import streamlit as st
+from dotenv import load_dotenv
+import time
+from typing import Iterator # Added for type hinting
+from agents.team import initialize_team
+import app.page_common
+
+# --- Configuration ---
+# Load environment variables from .env file
+load_dotenv()
+
+# Check for essential API keys
+# OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+# EMAIL_FROM = os.getenv("EMAIL_FROM")
+# EMAIL_TO = os.getenv("EMAIL_TO") # Default recipient
+# GITHUB_ACCESS_TOKEN = os.getenv("GITHUB_ACCESS_TOKEN")
+# RESEND_API_KEY = os.getenv("RESEND_API_KEY") # ResendTools requires this
+
+# Simple validation for required keys
+required_keys = {
+    'GOOGLE_API_KEY': os.getenv("GOOGLE_API_KEY")
+    # "OPENROUTER_API_KEY": OPENROUTER_API_KEY,
+    # "EMAIL_FROM": EMAIL_FROM,
+    # "EMAIL_TO": EMAIL_TO,
+    # "GITHUB_ACCESS_TOKEN": GITHUB_ACCESS_TOKEN,
+    # "RESEND_API_KEY": RESEND_API_KEY
+}
+
+missing_keys = [name for name, key in required_keys.items() if not key]
+
+if missing_keys:
+    st.error(f"Missing required environment variables: {', '.join(missing_keys)}. Please set them in your .env file or system environment.")
+    st.stop() # Stop execution if keys are missing
+
+# Set Streamlit page configuration
+st.set_page_config(
+    page_title="Investment Assistant Team",
+    page_icon="📈",
+    layout="wide"
+)
+
+# --- Session State Initialization ---
+# Initialize team_session_id for this specific browser session
+if "team_session_id" not in st.session_state:
+    st.session_state.team_session_id = f"streamlit-team-session-{int(time.time())}"
+# Initialize chat message history
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+if "team" not in st.session_state:
+    st.session_state.team = initialize_team()
+
+
+
+# --- Sidebar ---
+from app.components.sidebar import sidebar
+
+with st.sidebar:
+    sidebar(initialize_team)
+
+# --- Streamlit UI ---
+# st.set_page_config(
+#     page_title="Hello",
+#     page_icon="👋",
+# )
+
+st.write("# Welcome to CrorePT!")
+
+st.markdown(
+    f"""
+    CrorePT is investment game challenge, where you are awarded 1 Crore Rupees and You need to make most money by end of each month, and each year.unsafe_allow_html=
+
+    Slow and steady win the race!""")
+
+if st.user.is_logged_in:
+    st.write(f"**{st.user.name}** check your ") 
+    st.page_link("pages/1_Portfolio.py", label="portfolio", icon="📈")
+else:
+    st.write('**👈 Please Login**')
+
+st.markdown(      
+    """### Investment Assistant aka AInvest:
+    
+    This is also AI bot for you to do intelligent conversations on investements, new, statistics 
+    and most importantly performs
+    
+    """)
