@@ -43,7 +43,8 @@ if st.user.is_logged_in:
         if st.button('Cancel'):
                 state.ticker=None            
 
-    if state.ticker:        
+    if state.ticker:    
+
         st.write(f"## {state.ticker}")
         portfolio=state.user.get_portfolio()
         state['quote']=get_quote(state.ticker)
@@ -61,7 +62,7 @@ if st.user.is_logged_in:
 
         if state['quote']['currency']=='INR':
             with st.container(horizontal=True):
-                if st.button("Buy",disabled=cash<=amt):
+                if st.button("Buy",disabled=state.user.cash_balance<=amt):
                     state.user.add_transaction(state.ticker,
                                                qty,
                                                price,

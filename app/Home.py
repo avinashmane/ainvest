@@ -4,11 +4,11 @@ import streamlit as st
 # Load environment variables from .env file
 from dotenv import load_dotenv
 load_dotenv()
-
+import app.page_common
 import time
 from typing import Iterator # Added for type hinting
 from agents.team import initialize_team
-import app.page_common
+
 
 # --- Configuration ---
 

@@ -56,7 +56,7 @@ class User:
         data=[x.get().to_dict() for x in 
                 self.db_client.collection(f'users/{self.email}/tx'
                                            ).list_documents()]
-        print(f'users/{self.email}/tx', data)
+        # print(f'users/{self.email}/tx', data)
         return pd.DataFrame(data ) if len(data) else pd.DataFrame([],columns=self.tx_cols)
     
     def get_portfolio(self):

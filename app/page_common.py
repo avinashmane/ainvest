@@ -32,4 +32,8 @@ def init_page():
 init_page()
 
 with st.sidebar:
-    st.write(st.session_state)
+    # st.write(st.session_state)
+    # from app.components.login import show_login
+    # show_login()
+    if st.user.is_logged_in:
+        st.page_link("./Home.py",label="Login here")
