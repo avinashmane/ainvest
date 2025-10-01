@@ -1,15 +1,16 @@
 # app.py
 import os
 import streamlit as st
+# Load environment variables from .env file
 from dotenv import load_dotenv
+load_dotenv()
+from page_common import state
 import time
 from typing import Iterator # Added for type hinting
 from agents.team import initialize_team
-import app.page_common
 
 # --- Configuration ---
-# Load environment variables from .env file
-load_dotenv()
+
 
 # Check for essential API keys
 # OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
@@ -55,10 +56,11 @@ if "team" not in st.session_state:
 
 
 # --- Sidebar ---
-from app.components.sidebar import sidebar
+from components.sidebar import sidebar
 
 with st.sidebar:
-    sidebar(initialize_team)
+
+    sidebar()
 
 # --- Streamlit UI ---
 # st.set_page_config(

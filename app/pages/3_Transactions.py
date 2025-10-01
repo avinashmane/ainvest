@@ -3,8 +3,8 @@ import pandas as pd
 from datetime import datetime
 from textwrap import dedent
 from lib.yf import lookup_tickers,get_quote
-from app.components.quote import show_quote
-from app.page_common import init_state
+from components.quote import show_quote
+from page_common import init_state
 from lib.user import User
 
 state=st.session_state
@@ -24,26 +24,31 @@ def lookup_shares():
         state.ticker = selected_ticker.split("-")[1].strip()
         st.rerun()
 
+#----- UI ----
+from components.sidebar import sidebar
 
-#! --- UI ------
+with st.sidebar:
+    sidebar()
 
 if st.user.is_logged_in:
 
-    st.title(f"Welcome {st.user.given_name}")
+    st.title(f"Transactions")
 
     st.write(dedent(f"""
-                    ## Buy or Sell
-                    #### Date: {datetime.now()}
-                    #### Cash: {state.user.cash_balance:0,.2f} {state.profile.get('currency')}
+                    ## {st.user.given_name}, 
+                    #### are you ready ?
+                    * Date: {datetime.now()}
+                    * Cash: {state.user.cash_balance:0,.2f} {state.profile.get('currency')}
     """))
 
     with st.container(horizontal=True):
-        if st.button('Select Ticker Symbol'):
+        if st.button('Click here to Buy or Sell'):
             ticker= lookup_shares()
         if st.button('Cancel'):
                 state.ticker=None            
 
-    if state.ticker:        
+    if state.ticker:    
+
         st.write(f"## {state.ticker}")
         portfolio=state.user.get_portfolio()
         state['quote']=get_quote(state.ticker)
@@ -61,7 +66,7 @@ if st.user.is_logged_in:
 
         if state['quote']['currency']=='INR':
             with st.container(horizontal=True):
-                if st.button("Buy",disabled=cash<=amt):
+                if st.button("Buy",disabled=state.user.cash_balance<=amt):
                     state.user.add_transaction(state.ticker,
                                                qty,
                                                price,

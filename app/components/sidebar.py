@@ -2,13 +2,21 @@ import streamlit as st
 from pprint import pformat
 import os
 import time
-from app.components.login import show_login
+from components.login import show_login
+import pandas as pd
+from lib import dict2md_table
 
-def sidebar(initialize_team):
-    
+def sidebar():
+
+    st.title("Crore PT")
+
     show_login()
 
-    st.title("Team Settings")
+    if 'profile' in st.session_state:
+        st.subheader("Profile")
+        st.write(dict2md_table(st.session_state.profile))
+
+def sidebar_assistant(initialize_team=None):
     tabs=st.tabs(['Settings','About'],width='stretch')
     with tabs[0]:
         # Memory debug section

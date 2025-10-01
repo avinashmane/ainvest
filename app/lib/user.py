@@ -56,14 +56,14 @@ class User:
         data=[x.get().to_dict() for x in 
                 self.db_client.collection(f'users/{self.email}/tx'
                                            ).list_documents()]
-        print(f'users/{self.email}/tx', data)
+        # print(f'users/{self.email}/tx', data)
         return pd.DataFrame(data ) if len(data) else pd.DataFrame([],columns=self.tx_cols)
     
     def get_portfolio(self):
         data=self.list_transactions()
         if len(data):
             df=data[self.tx_cols[:3]].groupby(['ticker']).sum().reset_index()
-            print(df.apply(lambda r: r['ticker'], axis=1))
+            # print(df.apply(lambda r: r['ticker'], axis=1))
             df['lastPrice']=df.apply(lambda r: Ticker(r['ticker']).fast_info.get('lastPrice') , 
                                     axis=1)
             df['value']=df['lastPrice']*df['quantity']

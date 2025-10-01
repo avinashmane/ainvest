@@ -3,8 +3,8 @@ import yaml
 import time
 from agents.team import initialize_team
 from textwrap import dedent
-from app.components.login import login_screen, logged_in
-from app.page_common import user
+from components.login import login_screen, logged_in
+from page_common import user
 
 # Set Streamlit page configuration
 st.set_page_config(
@@ -13,10 +13,15 @@ st.set_page_config(
     layout="wide"
 )
 
-if not st.user.is_logged_in:
-    login_screen()
-else:
-    logged_in()
+
+#----- UI ----
+from components.sidebar import sidebar, sidebar_assistant
+
+with st.sidebar:
+    sidebar()
+    sidebar_assistant()
+
+if st.user.is_logged_in:
     # --- Session State Initialization ---
     # Initialize team_session_id for this specific browser session
     if "team_session_id" not in st.session_state:
@@ -27,9 +32,6 @@ else:
 
     if "team" not in st.session_state:
         st.session_state.team = initialize_team()
-
-
-
 
     st.title("🤑 Assistant for Investments")
     with st.container(horizontal=True):

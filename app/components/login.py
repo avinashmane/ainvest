@@ -2,8 +2,8 @@ import json
 import streamlit as st
 from lib.user import User
 
-with open(".streamlit/firebase_key.json") as f:
-    firebase_key=json.load(f)
+# with open(".streamlit/firebase_key.json") as f:
+#     firebase_key=json.load(f)
 
 # print(firebase_key['client_email'])
 

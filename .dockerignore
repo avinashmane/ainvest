@@ -12,6 +12,7 @@ __pycache__/
 # IDEs and editors
 .idea/
 .vscode/
+.dev*/
 
 # Other
 .python-version

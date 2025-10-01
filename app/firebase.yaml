@@ -1,0 +1,8 @@
+firebaseConfig:
+    apiKey: "AIzaSyDnUF7ECC7K9patUxrkIpTkHHY5LaZzAoM"
+    authDomain: "ainvest-avi.firebaseapp.com"
+    projectId: "ainvest-avi"
+    storageBucket: "ainvest-avi.firebasestorage.app"
+    messagingSenderId: "440944781903"
+    appId: "1:440944781903:web:d9cc227c3a8d232e05183a"
+    measurementId: "G-F940JLC19Q"

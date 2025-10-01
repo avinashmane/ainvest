@@ -1,7 +1,9 @@
 import streamlit as st
 from box import Box
 from lib.user import User
-
+# import sys
+# if '..' in sys.path: sys.path.append('..')
+# print(sys.path)
 import locale
 locale.setlocale(locale.LC_ALL, '')  
 
@@ -23,13 +25,12 @@ def init_page():
     else:
         user=User(None)
         st.session_state.profile =Box()
-    print(f"st.session_state.profile {st.session_state.profile}")
-
+    print("init_page():" , #f"st.session_state.profile {st.session_state.profile}")
+        getattr(state,"user","user not defined"))
     # for transactions
     init_state('ticker',None)
     init_state('quote',Box())
+        
 
 init_page()
 
-with st.sidebar:
-    st.write(st.session_state)
