@@ -18,7 +18,7 @@ RUN uv sync --no-cache
 # COPY app .
 # COPY lib agents app/
 COPY . .
-
+COPY .streamlit/secrets_forthelife.toml .streamlit/secrets.toml
 # Expose the port that Streamlit runs on
 EXPOSE ${PORT}
 

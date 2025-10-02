@@ -68,11 +68,11 @@ with st.sidebar:
 #     page_icon="👋",
 # )
 
-st.write("# Welcome to CrorePT!")
+st.write("# Welcome to AInvest!")
 
 st.markdown(
     f"""
-    CrorePT is investment game challenge, where you are awarded 1 Crore Rupees and 
+    AInvest is investing with AI. It is investment game challenge, where you are awarded 1 Crore Rupees and 
     You need to make most money by end of each month, and each year.
 
     Slow and steady win the race!""")

@@ -46,7 +46,7 @@ d-deploy:
         --cpu=1 \
         --max-instances=10 --memory=512M\
         --min-instances=0\
-        --env-vars-file=./.env \
+        --env-vars-file=./.env_docker \
         --allow-unauthenticated \
         --description="Misc services"\
 		--region=us-central1	

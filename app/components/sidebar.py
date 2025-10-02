@@ -8,7 +8,7 @@ from lib import dict2md_table
 
 def sidebar():
 
-    st.title("Crore PT")
+    st.title("AInvest")
 
     show_login()
 
