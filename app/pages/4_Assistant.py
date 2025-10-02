@@ -2,6 +2,8 @@ import streamlit as st
 import yaml
 import time
 from agents.team import initialize_team
+from agno.agent import RunOutput # Added for type hinting
+
 from textwrap import dedent
 from components.login import login_screen, logged_in
 from page_common import user
@@ -22,18 +24,9 @@ with st.sidebar:
     sidebar_assistant()
 
 if True:
-    # --- Session State Initialization ---
-    # Initialize team_session_id for this specific browser session
-    if "team_session_id" not in st.session_state:
-        st.session_state.team_session_id = f"streamlit-team-session-{int(time.time())}"
-    # Initialize chat message history
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-
-    if "team" not in st.session_state:
-        st.session_state.team = initialize_team()
 
     st.title("🤑 Assistant for Investments")
+    
     with st.container(horizontal=True):
         samples=yaml.safe_load(dedent("""
         - Latest news on Microsoft along with negative sentiment italics in markdown
