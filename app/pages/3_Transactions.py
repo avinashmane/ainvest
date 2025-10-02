@@ -26,11 +26,11 @@ def lookup_shares():
 
 #----- UI ----
 from components.sidebar import sidebar
-
+from components.login import is_logged_in, please_login
 with st.sidebar:
     sidebar()
 
-if st.user.is_logged_in:
+if is_logged_in():
 
     st.title(f"Transactions")
 
@@ -81,3 +81,5 @@ if st.user.is_logged_in:
         st.subheader("Transactions")
         txs=state.user.list_transactions().sort_values('date')
         st.write(txs)
+else:
+    please_login()

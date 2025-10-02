@@ -8,7 +8,7 @@ from page_common import state
 import time
 from typing import Iterator # Added for type hinting
 from agents.team import initialize_team
-
+from components.login import is_logged_in
 # --- Configuration ---
 
 
@@ -72,11 +72,12 @@ st.write("# Welcome to CrorePT!")
 
 st.markdown(
     f"""
-    CrorePT is investment game challenge, where you are awarded 1 Crore Rupees and You need to make most money by end of each month, and each year.unsafe_allow_html=
+    CrorePT is investment game challenge, where you are awarded 1 Crore Rupees and 
+    You need to make most money by end of each month, and each year.
 
     Slow and steady win the race!""")
 
-if st.user.is_logged_in:
+if is_logged_in():
     st.write(f"**{st.user.name}** check your ") 
     st.page_link("pages/1_Portfolio.py", label="portfolio", icon="📈")
 else:

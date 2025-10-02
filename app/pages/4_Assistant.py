@@ -16,12 +16,12 @@ st.set_page_config(
 
 #----- UI ----
 from components.sidebar import sidebar, sidebar_assistant
-
+from components.login import is_logged_in
 with st.sidebar:
     sidebar()
     sidebar_assistant()
 
-if st.user.is_logged_in:
+if True:
     # --- Session State Initialization ---
     # Initialize team_session_id for this specific browser session
     if "team_session_id" not in st.session_state:
@@ -106,5 +106,3 @@ if st.user.is_logged_in:
                 message_placeholder.markdown(f"⚠️ {error_message}")
                 # Add error message to history for context
                 st.session_state.messages.append({"role": "assistant", "content": f"Error: {str(e)}"})
-
-

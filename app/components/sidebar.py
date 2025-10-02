@@ -12,7 +12,7 @@ def sidebar():
 
     show_login()
 
-    if 'profile' in st.session_state:
+    if 'profile' in st.session_state and len(st.session_state.profile):
         st.subheader("Profile")
         st.write(dict2md_table(st.session_state.profile))
 

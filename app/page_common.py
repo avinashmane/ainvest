@@ -1,6 +1,7 @@
 import streamlit as st
 from box import Box
 from lib.user import User
+from components.login import is_logged_in
 # import sys
 # if '..' in sys.path: sys.path.append('..')
 # print(sys.path)
@@ -19,7 +20,7 @@ user={}
 
 def init_page(): 
     init_state('profile',{})
-    if st.user.is_logged_in:
+    if is_logged_in():
         user=init_state('user',User(st.user.email))
         st.session_state.profile =Box(user.get_profile())
     else:
