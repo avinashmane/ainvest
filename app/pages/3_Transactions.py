@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 from datetime import datetime
 from textwrap import dedent
 from lib.yf import lookup_tickers,get_quote
@@ -10,10 +9,6 @@ from lib.user import User
 state=st.session_state
 
 #--- code ----
-
-# init_state("tickers",[])
-
-
 @st.dialog("Select the ticker")
 def lookup_shares():
     t=st.text_input("Search for shares/funds")
@@ -34,11 +29,13 @@ if is_logged_in():
 
     st.title(f"Transactions")
 
+    cash_bal=getattr(state.user,"cash_balance",-0.01)
+    currency=state.get('profile',{}).get('currency','-')
     st.write(dedent(f"""
                     ## {st.user.given_name}, 
                     #### are you ready ?
                     * Date: {datetime.now()}
-                    * Cash: {state.user.cash_balance:0,.2f} {state.profile.get('currency')}
+                    * Cash: {cash_bal:0,.2f} {currency}
     """))
 
     with st.container(horizontal=True):
@@ -47,7 +44,7 @@ if is_logged_in():
         if st.button('Cancel'):
                 state.ticker=None            
 
-    if state.ticker:    
+    if 'ticker' in state and state.ticker:    
 
         st.write(f"## {state.ticker}")
         portfolio=state.user.get_portfolio()
@@ -79,7 +76,9 @@ if is_logged_in():
         
     else:
         st.subheader("Transactions")
-        txs=state.user.list_transactions().sort_values('date')
-        st.write(txs)
+
+        with st.spinner(text="Getting your transactions", show_time=True):    
+            txs=state.user.list_transactions().sort_values('date')
+            st.write(txs)
 else:
     please_login()

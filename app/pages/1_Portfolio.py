@@ -23,20 +23,21 @@ if is_logged_in():
 
     st.header(f"Summary") 
 
-    portfolio=state.user.get_portfolio()
-    pf_value=portfolio['value'].sum()
+    with st.spinner(text="Getting your holdings", show_time=True):
+        portfolio=state.user.get_portfolio()
+        pf_value=portfolio['value'].sum()
 
-    st.write(dict2md_table({
-        'Cash': state.user.cash_balance,
-        'Portfolio': pf_value,
-        'Total': pf_value+state.user.cash_balance,
-    },["Balance","Amount"]))
+        st.write(dict2md_table({
+            'Cash': state.user.cash_balance,
+            'Portfolio': pf_value,
+            'Total': pf_value+state.user.cash_balance,
+        },["Balance","Amount"]))
 
-    st.subheader("Portfolio")
-    st.write(portfolio)
+        st.subheader("Portfolio")
+        st.write(portfolio)
 
 
-    st.page_link("pages/3_Transactions.py", label="Click here to Buy/Sell", icon="↔️")
+        st.page_link("pages/3_Transactions.py", label="Click here to Buy/Sell", icon="↔️")
 
 else:
     please_login()
