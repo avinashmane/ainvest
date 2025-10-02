@@ -15,7 +15,6 @@ st.set_page_config(
     layout="wide"
 )
 
-
 #----- UI ----
 from components.sidebar import sidebar, sidebar_assistant
 from components.login import is_logged_in

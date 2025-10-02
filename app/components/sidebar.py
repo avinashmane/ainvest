@@ -17,6 +17,18 @@ def sidebar():
         st.write(dict2md_table(st.session_state.profile))
 
 def sidebar_assistant(initialize_team=None):
+
+    # --- Session State Initialization ---
+    # Initialize team_session_id for this specific browser session
+    if "team_session_id" not in st.session_state:
+        st.session_state.team_session_id = f"streamlit-team-session-{int(time.time())}"
+    # Initialize chat message history
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+
+    if "team" not in st.session_state:
+        st.session_state.team = initialize_team() if initialize_team else {}
+
     tabs=st.tabs(['Settings','About'],width='stretch')
     with tabs[0]:
         # Memory debug section
