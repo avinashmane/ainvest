@@ -2,6 +2,7 @@ import pandas as pd
 from lib import now
 from yfinance import Ticker
 from google.cloud import firestore
+from copy import copy
 
 default_profile={
     "currency":"INR",
@@ -11,7 +12,7 @@ default_profile={
 
 class User:
     
-    profile=default_profile
+    profile={}
     tx_cols="ticker amount quantity date price".split()
     def __init__(self, email,db_client=None):
         self.email=email
@@ -29,8 +30,9 @@ class User:
         return self.profile
     
     def create(self):
-        data=dict(**self.profile,createon=now())
-        # print(data)
+        data=copy(default_profile)
+        data['createon']=now()
+        print(data)
         return self.db_client.document(f'users/{self.email}'
                                            ).set(data)
 

@@ -24,7 +24,7 @@ with st.sidebar:
 
 if True:
 
-    st.title("🤑 Assistant for Investments")
+    st.title("🤑 AI Assistant for Investments")
     
     with st.container(horizontal=True):
         samples=yaml.safe_load(dedent("""

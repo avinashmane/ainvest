@@ -1,11 +1,8 @@
 import json
 import streamlit as st
 from lib.user import User
+state=st.session_state
 
-# with open(".streamlit/firebase_key.json") as f:
-#     firebase_key=json.load(f)
-
-# print(firebase_key['client_email'])
 def is_logged_in():
     if 'is_logged_in' in st.user:
         if st.user.is_logged_in:
@@ -20,13 +17,21 @@ def show_login():
         logged_in()
 
 def logged_in():
-    st.session_state.user=User(getattr(st.user,'email'))
-    st.session_state.user.update(**st.session_state.user.get_profile())
-    st.markdown(f'<img src="{st.user.picture}" style="border-radius:100%" with="100px"/>',
-                           unsafe_allow_html=True)
-    st.header(f"Welcome {st.user.given_name or st.user.name}!")
-
-    st.button("Log out", on_click=st.logout)
+    state.user=User(getattr(st.user,'email'))
+    try:
+        state.profile=state.user.get_profile()
+        state.user.update() #**state.profile    
+        st.markdown(f'<img src="{st.user.picture}" style="border-radius:100%" with="80px"/>',
+                            unsafe_allow_html=True)
+        st.header(f"Welcome {st.user.given_name or st.user.name}!")
+    except TypeError:
+            st.write("To receipt investment funds:")
+            if st.button("Register") and (not 'profile' in state):
+                state.user.create()
+                state.profile=state.user.get_profile()
+                st.write("Refresh screen now")
+    st.button(f"Log out", on_click=st.logout)
+    st.write(f"""Email: {st.user.email.split('@')[0]}@""")
 
 def st_login():
     return st.login(provider='google')
@@ -36,7 +41,7 @@ def login_screen():
     st.button("Log in with Google", 
               on_click=st_login)
     
-def please_login():
+def please_register():
     st.write("""
     It's fantastic that you're looking to take charge of your financial future! Investing doesn't have to be complicated. It's about putting your money to work so it grows over time.
 

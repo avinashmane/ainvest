@@ -59,15 +59,9 @@ if "team" not in st.session_state:
 from components.sidebar import sidebar
 
 with st.sidebar:
-
     sidebar()
 
 # --- Streamlit UI ---
-# st.set_page_config(
-#     page_title="Hello",
-#     page_icon="👋",
-# )
-
 st.write("# Welcome to AInvest!")
 
 st.markdown(

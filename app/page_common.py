@@ -22,7 +22,9 @@ def init_page():
     init_state('profile',{})
     if is_logged_in():
         user=init_state('user',User(st.user.email))
-        st.session_state.profile =Box(user.get_profile())
+        try: profile=user.get_profile()
+        except:profile={}
+        st.session_state.profile =Box()
     else:
         user=User(None)
         st.session_state.profile =Box()

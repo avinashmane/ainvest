@@ -12,11 +12,9 @@ state=st.session_state
 
 #----- UI ----
 from components.sidebar import sidebar
-from components.login import is_logged_in, please_login
+from components.login import is_logged_in, please_register
 with st.sidebar:
     sidebar()
-
-
 
 if is_logged_in():
     st.title(f"Welcome {st.user.given_name}")
@@ -24,8 +22,11 @@ if is_logged_in():
     st.header(f"Summary") 
 
     with st.spinner(text="Getting your holdings", show_time=True):
-        portfolio=state.user.get_portfolio()
-        pf_value=portfolio['value'].sum()
+        try:
+            portfolio=state.user.get_portfolio()
+            pf_value=portfolio['value'].sum()
+        except:
+            pf_value=0
 
         st.write(dict2md_table({
             'Cash': state.user.cash_balance,
@@ -40,4 +41,4 @@ if is_logged_in():
         st.page_link("pages/3_Transactions.py", label="Click here to Buy/Sell", icon="↔️")
 
 else:
-    please_login()
+    please_register()

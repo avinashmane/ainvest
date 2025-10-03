@@ -21,7 +21,7 @@ def lookup_shares():
 
 #----- UI ----
 from components.sidebar import sidebar
-from components.login import is_logged_in, please_login
+from components.login import is_logged_in, please_register
 with st.sidebar:
     sidebar()
 
@@ -81,4 +81,4 @@ if is_logged_in():
             txs=state.user.list_transactions().sort_values('date')
             st.write(txs)
 else:
-    please_login()
+    please_register()
