@@ -3,6 +3,7 @@ from lib import now
 from yfinance import Ticker
 from google.cloud import firestore
 from copy import copy
+from lib.database import db
 
 default_profile={
     "currency":"INR",
@@ -17,7 +18,6 @@ class User:
     def __init__(self, email,db_client=None):
         self.email=email
         if db_client == None:
-            from lib.database import db
             self.db_client=db.db_client
         else:
             self.db_client=db_client
@@ -83,4 +83,28 @@ class User:
         return self.profile.get('cash_balance',default_profile["cash_balance"])
 
         
+class Accounts:
+    @staticmethod
+    def list_users():
+        
+        data=[{"id":x.id,**x.get().to_dict()} for x in 
+                db.db_client.collection(f'users'
+                                           ).list_documents()]
+        return pd.DataFrame(data ) if len(data) \
+            else pd.DataFrame([])
     
+    @staticmethod
+    def get_leaderboard():
+        
+        def get_pf_value(row):
+            try:
+                portfolio=User(row.id).get_portfolio()
+                pf_value=portfolio['value'].sum()
+            except:
+                pf_value=0
+            return pf_value
+
+        users=Accounts.list_users()
+        users['portfolio'] = users.apply(get_pf_value,axis=1)
+        users['total'] = users['portfolio'] + users['cash_balance'] 
+        return users

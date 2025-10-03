@@ -38,7 +38,7 @@ if is_logged_in():
         st.write(portfolio)
 
 
-        st.page_link("pages/3_↔️_Transactions.py", label="Click here to Buy/Sell", icon="↔️")
+        st.page_link("pages/2_↔️_Transactions.py", label="Click here to Buy/Sell", icon="↔️")
 
 else:
     please_register()

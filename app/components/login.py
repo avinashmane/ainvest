@@ -23,18 +23,23 @@ def logged_in():
         state.user.update() #**state.profile    
         st.markdown(f'<img src="{st.user.picture}" style="border-radius:100%" with="80px"/>',
                             unsafe_allow_html=True)
-        st.header(f"Welcome {st.user.given_name or st.user.name}!")
+        st.header(f"Welcome {st.user.name}!")
     except TypeError:
             st.write("To receipt investment funds:")
             if st.button("Register") and (not 'profile' in state):
                 state.user.create()
                 state.profile=state.user.get_profile()
                 st.write("Refresh screen now")
-    st.button(f"Log out", on_click=st.logout)
-    st.write(f"""Email: {st.user.email.split('@')[0]}@""")
+    st.button(f"Log out", on_click=st_login, args="logout")
+    st.write(f"""Email: {st.user.email}""")
 
-def st_login():
-    return st.login(provider='google')
+def st_login(x='login'):
+    if x=='logout':
+        return st.logout()
+        state.user=None
+        state.profile={}
+    else:
+        return st.login(provider='google')
 
 def login_screen():
     st.subheader("This app is needs a login and it's free.")
@@ -61,7 +66,7 @@ Before you invest a single penny, you need a solid foundation.
 
 * **Pay Yourself First:** Automate a portion of your income (even a small amount!) to go directly into a savings or investment account. Treat this like a non-negotiable bill.
 * **Crush High-Interest Debt:** Debt, especially credit card debt, is an *anti-investment*. Its high interest rate is a guaranteed loss that will outpace most investment returns. Pay this off first.
-* **Build an Emergency Fund:** Keep $\mathbf{3}$ to $\mathbf{6}$ months' worth of living expenses in a separate, easily accessible savings account. This fund prevents you from having to sell investments at a loss when life throws a curveball.
+* **Build an Emergency Fund:** Keep 3 to 6 months' worth of living expenses in a separate, easily accessible savings account. This fund prevents you from having to sell investments at a loss when life throws a curveball.
 
 ### 2. Understand Risk: The Price of Reward
 

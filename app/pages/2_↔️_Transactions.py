@@ -96,7 +96,7 @@ if is_logged_in():
                 if 'completed' in state.button.get('tx'):
                     st.write("Your transaction completed.  Ready for next transaction?")
                     list_transactions()
-                # st.page_link("pages/3_↔️_Transactions.py", label="Click here to Buy/Sell", icon="↔️") 
+                # st.page_link("pages/2_↔️_Transactions.py", label="Click here to Buy/Sell", icon="↔️") 
             
                     
         

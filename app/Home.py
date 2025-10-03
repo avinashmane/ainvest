@@ -43,17 +43,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- Session State Initialization ---
-# Initialize team_session_id for this specific browser session
-if "team_session_id" not in st.session_state:
-    st.session_state.team_session_id = f"streamlit-team-session-{int(time.time())}"
-# Initialize chat message history
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-if "team" not in st.session_state:
-    st.session_state.team = initialize_team()
-
 
 
 # --- Sidebar ---
@@ -66,16 +55,16 @@ with st.sidebar:
 st.write("# Welcome to AInvest!")
 
 st.markdown(
-    f"""
-    AInvest is investing with AI. It is investment game challenge, where you are awarded 1 Crore Rupees and 
-    You need to make most money by end of each month, and each year.
+    f"""AInvest is investing with AI. It is investment game challenge, where you are awarded 1 Crore Rupees and 
+You need to make most money by end of each month, and each year.
 
-    Slow and steady win the race!""")
+Slow and steady win the race!""")
 
 if is_logged_in():
-    with st.container(horizontal=True):
-        st.write(f"**{st.user.name}** check your ") 
-        st.page_link("pages/1_📈_Portfolio.py", label="portfolio", icon="📈")
+    # with st.container(horizontal=True):
+    st.write(f"**{st.user.name}** check your ") 
+    st.page_link("pages/1_📈_Portfolio.py", label="portfolio", icon="📈")
+
 else:
     st.write('**👈 Please Login**')
 
@@ -87,5 +76,7 @@ st.markdown(
     
     """)
 
+
+st.subheader("Quotes")
 ticker=st.text_input("Ticker Symbol",value='^NSEI')
 show_stock(ticker)
