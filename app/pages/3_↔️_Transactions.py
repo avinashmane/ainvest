@@ -15,9 +15,27 @@ def lookup_shares():
     quotes = lookup_tickers(state['profile'],t)
     selected_ticker= st.selectbox("Ticker", options=[f"{i} - {q["symbol"]} - {q["shortname"]} ({q["exchDisp"]} {q["typeDisp"]})"
                             for i,q in enumerate(quotes)])
-    if st.button("Submit"):
+    st.write("You can also enter exact symbols founds on https://finance.yahoo.com. e.g. RELIANCE.BO")
+    if st.button("Select"):
         state.ticker = selected_ticker.split("-")[1].strip()
         st.rerun()
+
+def list_transactions():
+    st.subheader("Transactions")
+
+    with st.spinner(text="Getting your transactions", show_time=True):    
+        txs=state.user.list_transactions().sort_values('date')
+        st.write(txs)
+        st.page_link('pages/1_📈_Portfolio.py', label="Check your 📈 Portflio")
+
+def buy_sell(ticker,qty,price,amt):
+    with st.spinner():
+        ts  = state.user.add_transaction(ticker,qty,price,amt)
+    # st.write(f'Transaction successful at {ts}.  Please check your portfolio')
+    return ts
+
+def set_status(btn,x=None):
+    state.button[btn]=x
 
 #----- UI ----
 from components.sidebar import sidebar
@@ -63,22 +81,28 @@ if is_logged_in():
 
         if state['quote']['currency']=='INR':
             with st.container(horizontal=True):
-                if st.button("Buy",disabled=state.user.cash_balance<=amt):
-                    state.user.add_transaction(state.ticker,
-                                               qty,
-                                               price,
-                                               -amt)
-                if st.button("Sell",disabled=avl_qty<=qty):
-                    state.user.add_transaction(state.ticker,
-                                               -qty,
-                                               price,
-                                               amt)
+                if st.button("Buy",
+                             disabled=state.user.cash_balance<=amt,
+                             on_click=set_status, args=['tx','Buy triggered']):
+                    ts=buy_sell(state.ticker,qty,price,-amt)
+                    set_status('tx',f"{ts} transaction completed")
+                if st.button("Sell",
+                             disabled=avl_qty<=qty,
+                             on_click=set_status, args=['tx','Sell triggered']):
+                    ts=buy_sell(state.ticker,-qty,price,amt)
+                    set_status('tx',f"{ts} transaction completed")
+            if status:=state.button.get('tx'):
+                st.write(status)
+                if 'completed' in state.button.get('tx'):
+                    st.write("Your transaction completed.  Ready for next transaction?")
+                    list_transactions()
+                # st.page_link("pages/3_↔️_Transactions.py", label="Click here to Buy/Sell", icon="↔️") 
+            
+                    
         
     else:
-        st.subheader("Transactions")
-
-        with st.spinner(text="Getting your transactions", show_time=True):    
-            txs=state.user.list_transactions().sort_values('date')
-            st.write(txs)
+        list_transactions()
 else:
     please_register()
+
+

@@ -45,7 +45,7 @@ if True:
     user_query = st.chat_input("Ask the investment team anything...")
 
     if user_query:
-        print(user_query)
+        # print(user_query)
         # Add user message to chat history
         st.session_state.messages.append({"role": "user", "content": user_query})
 

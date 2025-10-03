@@ -9,6 +9,7 @@ import time
 from typing import Iterator # Added for type hinting
 from agents.team import initialize_team
 from components.login import is_logged_in
+from components.stock import show_stock
 # --- Configuration ---
 
 
@@ -72,8 +73,9 @@ st.markdown(
     Slow and steady win the race!""")
 
 if is_logged_in():
-    st.write(f"**{st.user.name}** check your ") 
-    st.page_link("pages/1_Portfolio.py", label="portfolio", icon="📈")
+    with st.container(horizontal=True):
+        st.write(f"**{st.user.name}** check your ") 
+        st.page_link("pages/1_📈_Portfolio.py", label="portfolio", icon="📈")
 else:
     st.write('**👈 Please Login**')
 
@@ -84,3 +86,6 @@ st.markdown(
     and most importantly performs
     
     """)
+
+ticker=st.text_input("Ticker Symbol",value='^NSEI')
+show_stock(ticker)

@@ -19,7 +19,7 @@ with st.sidebar:
 if is_logged_in():
     st.title(f"Welcome {st.user.given_name}")
 
-    st.header(f"Summary") 
+    st.header(f"Balances") 
 
     with st.spinner(text="Getting your holdings", show_time=True):
         try:
@@ -38,7 +38,7 @@ if is_logged_in():
         st.write(portfolio)
 
 
-        st.page_link("pages/3_Transactions.py", label="Click here to Buy/Sell", icon="↔️")
+        st.page_link("pages/3_↔️_Transactions.py", label="Click here to Buy/Sell", icon="↔️")
 
 else:
     please_register()

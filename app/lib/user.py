@@ -39,27 +39,29 @@ class User:
     def update(self,**kw):
         kw.update({"lastlogged":now()})
         return self.db_client.document(f'users/{self.email}'
-                                           ).set(kw)
+                                           ).update(kw)
         
     def add_transaction(self,ticker: str, quantity: int, price: float, amount: float):
     
         self.profile['cash_balance']+=amount
         self.db_client.document(f'users/{self.email}'
                                 ).update(self.profile)
-        
-        return self.db_client.document(f'users/{self.email}/tx/{now()}'
+        timestamp=now()
+        ret = self.db_client.document(f'users/{self.email}/tx/{timestamp}'
                                            ).set(dict(date=now(),
                                                          ticker=ticker,
                                                          quantity=quantity,
                                                          price=price,
                                                          amount=amount))
+        return timestamp
     
     def list_transactions(self):
         data=[x.get().to_dict() for x in 
                 self.db_client.collection(f'users/{self.email}/tx'
                                            ).list_documents()]
         # print(f'users/{self.email}/tx', data)
-        return pd.DataFrame(data ) if len(data) else pd.DataFrame([],columns=self.tx_cols)
+        return pd.DataFrame(data )[self.tx_cols] if len(data) \
+            else pd.DataFrame([],columns=self.tx_cols)
     
     def get_portfolio(self):
         data=self.list_transactions()
@@ -69,6 +71,8 @@ class User:
             df['lastPrice']=df.apply(lambda r: Ticker(r['ticker']).fast_info.get('lastPrice') , 
                                     axis=1)
             df['value']=df['lastPrice']*df['quantity']
+            df['gain']=df['value']+df['amount']
+            
             # print(df)
             return df
         else:
