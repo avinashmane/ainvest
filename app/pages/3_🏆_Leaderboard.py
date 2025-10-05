@@ -31,9 +31,9 @@ st.title(f"Leaderboard")
 
 cols="id currency total cash_balance".split()
 if st.button('Load'):
-    
-    users=Accounts.get_leaderboard()
-    st.dataframe(users[cols])
+    with st.spinner():
+        users=Accounts.get_leaderboard()
+        st.dataframe(users[cols])
 
          
 

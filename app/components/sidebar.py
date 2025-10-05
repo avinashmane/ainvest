@@ -30,6 +30,7 @@ def sidebar_assistant(initialize_team=None):
         state.team = initialize_team() if initialize_team else {}
 
     tabs=st.tabs(['Settings','About'],width='stretch')
+    
     with tabs[0]:
         # Memory debug section
         if st.checkbox("Show Team Memory Contents", value=False):

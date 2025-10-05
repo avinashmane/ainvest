@@ -1,6 +1,6 @@
 import pandas as pd
 from lib import now
-from yfinance import Ticker
+from lib.yf import get_quote
 from google.cloud import firestore
 from copy import copy
 from lib.database import db
@@ -68,8 +68,7 @@ class User:
         if len(data):
             df=data[self.tx_cols[:3]].groupby(['ticker']).sum().reset_index()
             # print(df.apply(lambda r: r['ticker'], axis=1))
-            df['lastPrice']=df.apply(lambda r: Ticker(r['ticker']).fast_info.get('lastPrice') , 
-                                    axis=1)
+            df['lastPrice']=df.apply(lambda r: get_quote(r['ticker']).get('lastPrice'), axis=1)
             df['value']=df['lastPrice']*df['quantity']
             df['gain']=df['value']+df['amount']
             

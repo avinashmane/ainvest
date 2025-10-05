@@ -1,6 +1,6 @@
 import yfinance as yf
 from pydash import pick
-
+from functools import lru_cache
 
 def lookup_tickers(profile, ticker):
     lst=yf.Search(ticker,
@@ -12,6 +12,7 @@ def lookup_tickers(profile, ticker):
             
     return quotes
 
+@lru_cache(maxsize=128)
 def get_quote(ticker):
     t = yf.Ticker(ticker)
     return pick(t.fast_info,

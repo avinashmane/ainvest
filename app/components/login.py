@@ -1,4 +1,4 @@
-import json
+import os
 import streamlit as st
 from lib.user import User
 state=st.session_state
@@ -25,19 +25,18 @@ def logged_in():
                             unsafe_allow_html=True)
         st.header(f"Welcome {st.user.name}!")
     except TypeError:
-            st.write("To receipt investment funds:")
-            if st.button("Register") and (not 'profile' in state):
-                state.user.create()
-                state.profile=state.user.get_profile()
-                st.write("Refresh screen now")
-    st.button(f"Log out", on_click=st_login, args=["logout"])
+        register()
+    except Exception as e:
+        print(f"Error logged_in(): {e!r}")
     st.write(f"""Email: {st.user.email}""")
+    call_menu()
+    # Hide the deploy button
 
 def st_login(x='login'):
     if x=='logout':
-        return st.logout()
         state.user=None
         state.profile={}
+        return st.logout()
     else:
         return st.login(provider='google')
 
@@ -46,6 +45,24 @@ def login_screen():
     st.button("Log in with Google", 
               on_click=st_login)
     
+def register():
+    st.write("To receive investment funds:")
+    if st.button("Register") and (not 'profile' in state):
+        # with st.spinner():
+        state.user.create()
+        state.profile=state.user.get_profile()
+        st.rerun()
+        
+def call_menu():
+    menu=st.selectbox("Menu",options=["Logout","Feedback","Withdraw", "Delete Account"])
+    if st.button("Go"):
+        if menu=="Logout":
+            st_login("logout")
+        elif menu=='Feedback':
+            st.write(f"Write your feedback here {os.getenv('FEEDBACK_URL')}")
+        else:
+            st.write('Not implemented.  Please be patient.')
+
 def please_register():
     st.write("""
     It's fantastic that you're looking to take charge of your financial future! Investing doesn't have to be complicated. It's about putting your money to work so it grows over time.
