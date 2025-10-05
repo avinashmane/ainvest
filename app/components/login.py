@@ -24,6 +24,7 @@ def login_set_state(email=None):
             state.email=email
         else:
             state.email=logged_user
+            state.name=st.user.name
         state.user=User(state.email)
         state.profile=state.user.get_profile()
         state.proxy_login= state.email != st.user.email
@@ -33,7 +34,8 @@ def logged_in():
 
     try:
         login_set_state(state.email if 'email' in state else None)
-        state.user.update() #**state.profile    
+        updates= {} if 'name' in state.profile else {"name": state.name}
+        state.user.update(**updates) #**state.profile    
 
         if state.get('proxy_login'):
             st.write(f"""Email: {state.email}""")
@@ -46,8 +48,9 @@ def logged_in():
                                 unsafe_allow_html=True)
             st.header(f"Welcome {st.user.name}!")
             st.write(f"""Email: {state.email}""")            
-    except TypeError:
+    except TypeError as e:
         register()
+        print(f"Error logged_in(): {e!r}")
     except Exception as e:
         print(f"Error logged_in(): {e!r}")
 
@@ -78,6 +81,7 @@ def register():
         state.profile=state.user.get_profile()
         st.rerun()
 
+@st.fragment
 def call_menu():
     menu_options=["Logout","Feedback",'Session Trace',"Withdraw", "Delete Account"]
     menu=state.get('menu')
@@ -93,7 +97,11 @@ def call_menu():
         st.write(f"st.session_state")
         st.write(st.session_state)
     else:
-        st.write('Not implemented.  Please be patient.')
+        if menu:
+            st.write('Not implemented.  Please be patient.')
+        else:
+            st.write("Select a menu option")
+
     # st.rerun()
 
 from lib import read_file
@@ -102,4 +110,3 @@ def please_register():
     #          width=300)
     st.write(read_file("app/texts/please_register.md"))
     
-

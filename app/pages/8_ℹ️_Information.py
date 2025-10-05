@@ -18,5 +18,18 @@ if ('admin' in state) and state.admin:
     
 else:
     st.header("Information")
-    st.subheader("Data Security and Privacy")
-    st.subheader("Terms")
+    
+    # Data Security and Privacy
+    try:
+        with open("app/texts/data_security_and_privacy.md", "r", encoding="utf-8") as f:
+            st.markdown(f.read())
+    except Exception as e:
+        st.error(f"Could not load data security text: {e}")
+
+    st.markdown("---")
+    "Terms of Usage"
+    try:
+        with open("app/texts/terms_of_usage.md", "r", encoding="utf-8") as f:
+            st.markdown(f.read())
+    except Exception as e:
+        st.error(f"Could not load terms of usage text: {e}")

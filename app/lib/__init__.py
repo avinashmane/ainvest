@@ -20,4 +20,10 @@ def dict2md_table(d,header=['Item','']):
 def read_file(file_path):
     with open(file_path, "r") as file:
         return file.read()
-
+    
+def curr(x,precision=2):
+    if isinstance(x, (float, int)):
+        format_str = f"{{:,.{precision}f}}" if isinstance(x, float) else "{:,}"
+        return format_str.format(x)
+    else:
+        return x

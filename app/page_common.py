@@ -30,7 +30,7 @@ def init_page():
         user=User(None)
         st.session_state.profile =Box()
     print("init_page():" , #f"st.session_state.profile {st.session_state.profile}")
-        getattr(state,"user","user not defined"))
+        getattr(state,"user","No state.user. User not logged"))
     # for transactions
     init_state('ticker',None)
     init_state('quote',Box())
