@@ -19,6 +19,7 @@ def init_state(f,default=[]):
 user={}
 
 def init_page(): 
+    init_state('email',None)
     init_state('profile',{})
     if is_logged_in():
         user=init_state('user',User(st.user.email))
@@ -35,6 +36,7 @@ def init_page():
     init_state('quote',Box())
     init_state('button',Box())
     init_state('log',Box())
+    init_state('menu','Logout')
 
 init_page()
 

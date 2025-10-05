@@ -4,12 +4,12 @@ import os
 import time
 from components.login import show_login
 import pandas as pd
-from lib import dict2md_table
+from lib import dict2md_table, read_file
 state=st.session_state
+
 def sidebar():
-
-    st.title("AInvest")
-
+    st.logo("app/assets/logo.png")#,width=160,caption='AI + Invest = AInvest')
+    st.header(":rainbow[AInvest]")
     show_login()
 
     if 'profile' in st.session_state and len(state.profile):
@@ -67,25 +67,12 @@ def sidebar_assistant(initialize_team=None):
             flds="event content".split()
             for i,e in enumerate(state.log) :
                 try: st.write(f"{i:2d}: "+" : ".join([getattr(e,f) for f in flds]))
-                except: pass
+                except: st.write(f"{i:2d}: "+"Error")
 
     with tabs[1]:
         st.title("About")
         st.markdown("""
-        
-        * Version 1.0
-                    
-        **How it works**:
-        - The team coordinator analyzes your query.
-        - Tasks are delegated to specialists (Searcher, YahooFinance, General).
-        - Responses are synthesized into a final answer.
-        - Team memory retains context within this session.
-
-        **Example queries**:
-        - "What are the latest AI breakthroughs?"
-        - "Crawl agno.com and summarize the homepage."
-        - "Summarize the YouTube video: https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-        - "What was the first question I asked you?" (tests memory)
-                    
+        * Version 1.1                       
         """)
+        st.write(read_file("app/texts/about.md"))
 

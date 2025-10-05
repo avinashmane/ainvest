@@ -17,8 +17,8 @@ with st.sidebar:
     sidebar()
 
 if is_logged_in():
-    st.title(f"Welcome {st.user.given_name}")
-
+    st.title(f"Portfolio ")
+    st.write(f"### Account: {state.user.email if state.get('proxy_login') else st.user.name}")
     st.header(f"Balances") 
 
     with st.spinner(text="Getting your holdings", show_time=True):

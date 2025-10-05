@@ -89,7 +89,7 @@ class Accounts:
         data=[{"id":x.id,**x.get().to_dict()} for x in 
                 db.db_client.collection(f'users'
                                            ).list_documents()]
-        return pd.DataFrame(data ) if len(data) \
+        return pd.DataFrame([x for x in data if not 'hide' in x] ) if len(data) \
             else pd.DataFrame([])
     
     @staticmethod
@@ -102,8 +102,9 @@ class Accounts:
             except:
                 pf_value=0
             return pf_value
-
-        users=Accounts.list_users()
-        users['portfolio'] = users.apply(get_pf_value,axis=1)
-        users['total'] = users['portfolio'] + users['cash_balance'] 
-        return users
+        try:
+            users=Accounts.list_users()
+            users['portfolio'] = users.apply(get_pf_value,axis=1)
+            users['total'] = users['portfolio'] + users['cash_balance'] 
+        finally:
+            return users

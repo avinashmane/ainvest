@@ -30,7 +30,7 @@ with st.sidebar:
 st.title(f"Leaderboard")
 
 cols="id currency total cash_balance".split()
-if st.button('Load'):
+if True:# always/ st.button('Load'):
     with st.spinner():
         users=Accounts.get_leaderboard()
         st.dataframe(users[cols])

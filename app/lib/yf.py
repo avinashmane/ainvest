@@ -4,7 +4,8 @@ from functools import lru_cache
 
 def lookup_tickers(profile, ticker):
     lst=yf.Search(ticker,
-                max_results=20,
+                max_results=30,
+                recommended = 30,
                 news_count=0,
                 enable_fuzzy_query=True).all
     quotes=[x for x in lst["quotes"] if (x["isYahooFinance"]==True) 

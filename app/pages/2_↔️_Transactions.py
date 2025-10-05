@@ -46,12 +46,12 @@ with st.sidebar:
 if is_logged_in():
 
     st.title(f"Transactions")
-
+    st.write(f"### Account: {state.user.email if state.get('proxy_login') else st.user.name}")
+    
     cash_bal=getattr(state.user,"cash_balance",-0.01)
     currency=state.get('profile',{}).get('currency','-')
     st.write(dedent(f"""
-                    ## {st.user.given_name}, 
-                    #### are you ready ?
+                    ### are you ready ?
                     * Date: {datetime.now()}
                     * Cash: {cash_bal:0,.2f} {currency}
     """))

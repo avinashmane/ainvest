@@ -16,3 +16,8 @@ def dict2md_table(d,header=['Item','']):
             md_row+=f"{ x }|"
         md_tab+=md_row
     return md_tab
+
+def read_file(file_path):
+    with open(file_path, "r") as file:
+        return file.read()
+
