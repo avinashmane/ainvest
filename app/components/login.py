@@ -30,7 +30,7 @@ def logged_in():
                 state.user.create()
                 state.profile=state.user.get_profile()
                 st.write("Refresh screen now")
-    st.button(f"Log out", on_click=st_login, args="logout")
+    st.button(f"Log out", on_click=st_login, args=["logout"])
     st.write(f"""Email: {st.user.email}""")
 
 def st_login(x='login'):

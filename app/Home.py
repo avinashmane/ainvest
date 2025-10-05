@@ -5,7 +5,7 @@ import streamlit as st
 from dotenv import load_dotenv
 load_dotenv()
 from page_common import state
-import time
+from textwrap import dedent
 from typing import Iterator # Added for type hinting
 from agents.team import initialize_team
 from components.login import is_logged_in
@@ -52,7 +52,8 @@ with st.sidebar:
     sidebar()
 
 # --- Streamlit UI ---
-st.write("# Welcome to AInvest!")
+user_name=st.user.name if is_logged_in() else "to AInvest"
+st.header(f"Welcome {user_name}!")
 
 st.markdown(
     f"""AInvest is investing with AI. It is investment game challenge, where you are awarded 1 Crore Rupees and 
@@ -62,19 +63,18 @@ Slow and steady win the race!""")
 
 if is_logged_in():
     # with st.container(horizontal=True):
-    st.write(f"**{st.user.name}** check your ") 
-    st.page_link("pages/1_📈_Portfolio.py", label="portfolio", icon="📈")
+    st.page_link("pages/1_📈_Portfolio.py", label="Check your portfolio", icon="📈")
 
 else:
     st.write('**👈 Please Login**')
 
-st.markdown(      
-    """### Investment Assistant aka AInvest:
+st.markdown(dedent("""
+    ### :blue[Investment Assistant aka AInvest]:
     
-    This is also AI bot for you to do intelligent conversations on investements, new, statistics 
-    and most importantly performs
+    :blue[This is also AI bot for you to do intelligent conversations on investements, new, statistics 
+    and most importantly performs]
     
-    """)
+    """))
 
 
 st.subheader("Quotes")

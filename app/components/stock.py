@@ -34,10 +34,8 @@ def altair_chart(ticker_obj):
     with st.spinner():
         df_price= ticker_obj.history( period ).reset_index()#['Close']
         close_desc=df_price['Close'].describe(exclude=[0,None])
-        st.dataframe({"Close":{  "Open":df_price['Close'].values[0],
-                        "Minimum":close_desc['min'],
-                      "Maximum":close_desc['max'],
-                      }} )
+        st.write(f"""Open:{df_price['Close'].values[0]:,.2f}, 
+                  Minimum: {close_desc['min']:,.2f}, Maximum: {close_desc['max']:,.2f}""" )
 
         st.altair_chart(alt.Chart(df_price).mark_line().encode(
             x="Date:T",
