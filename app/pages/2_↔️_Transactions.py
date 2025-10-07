@@ -52,7 +52,7 @@ if is_logged_in():
     st.write(f"### Account: {state.user.email if state.get('proxy_login') else st.user.name}")
     
     cash_bal=getattr(state.user,"cash_balance",-0.01)
-    currency=curr(state.get('profile',{}).get('currency','-'))
+    currency=state.get('profile',{}).get('currency','-')
     st.write(dedent(f"""
                     ### are you ready ?
                     * Date: {datetime.now()}
@@ -60,7 +60,7 @@ if is_logged_in():
     """))
 
     with st.container(horizontal=True):
-        if st.button('Select investment to Buy or Sell'):
+        if st.button('Click here to Buy or Sell'):
             ticker= lookup_shares()
         if st.button('Cancel'):
                 state.ticker=None            
@@ -70,7 +70,6 @@ if is_logged_in():
         st.write(f"## {state.ticker}")
         portfolio=state.user.get_portfolio()
         state['quote']=get_quote(state.ticker)
-        
         show_quote(state['quote'])
         
         try: avl_qty=portfolio.query("ticker==@state.ticker").loc[0,'quantity']
@@ -84,6 +83,7 @@ if is_logged_in():
         amt=st.number_input("Value", value=round(qty*price,2), min_value=1.0, disabled=True)
         if st.button('Check'):
             st.write(f"Symbol: {ticker}")
+
 
         if get_state('quote',{'currency':''})['currency']=='INR':
             with st.container(horizontal=True):
