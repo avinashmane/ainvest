@@ -18,7 +18,7 @@ def lookup_shares():
                             for i,q in enumerate(quotes)])
     st.write("You can also enter exact symbols founds on https://finance.yahoo.com. e.g. RELIANCE.BO")
     if st.button("Select"):
-        state.ticker = selected_ticker.split("-")[1].strip()
+        state.ticker = selected_ticker.split(" - ")[0].strip()
         st.rerun()
 
 def list_transactions():

@@ -1,5 +1,6 @@
 import streamlit as st
 from lib import curr
+
 def show_quote(quote):
     st.markdown(f"""
 * {quote.get("exchange")} {quote.get("currency")} {quote.get("timezone")}
