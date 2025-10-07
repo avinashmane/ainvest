@@ -5,7 +5,7 @@ import time
 from components.login import show_login
 import pandas as pd
 from lib import dict2md_table, read_file
-state=st.session_state
+from page_common import get_state,state
 
 def sidebar():
     st.logo("app/assets/logo.png")#,width=160,caption='AI + Invest = AInvest')
@@ -65,7 +65,7 @@ def sidebar_assistant(initialize_team=None):
         #--- Log ---
         with st.container(width=300):
             flds="event content".split()
-            for i,e in enumerate(state.log) :
+            for i,e in enumerate(get_state('log',[])) :
                 try: st.write(f"{i:2d}: "+" : ".join([getattr(e,f) for f in flds]))
                 except: st.write(f"{i:2d}: "+"Error")
 

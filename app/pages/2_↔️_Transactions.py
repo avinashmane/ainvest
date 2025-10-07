@@ -3,7 +3,8 @@ from datetime import datetime
 from textwrap import dedent
 from lib.yf import lookup_tickers,get_quote
 from components.quote import show_quote
-from page_common import init_state
+from lib import curr
+from page_common import get_state
 from lib.user import User
 
 state=st.session_state
@@ -12,7 +13,7 @@ state=st.session_state
 @st.dialog("Select the ticker")
 def lookup_shares():
     t=st.text_input("Search for shares/funds")
-    quotes = lookup_tickers(state['profile'],t)
+    quotes = lookup_tickers(get_state('profile'),t)
     selected_ticker= st.selectbox("Ticker", options=[f"{i} - {q["symbol"]} - {q["shortname"]} ({q["exchDisp"]} {q["typeDisp"]})"
                             for i,q in enumerate(quotes)])
     st.write("You can also enter exact symbols founds on https://finance.yahoo.com. e.g. RELIANCE.BO")
@@ -35,6 +36,8 @@ def buy_sell(ticker,qty,price,amt):
     return ts
 
 def set_status(btn,x=None):
+    if not 'button' in state:
+        state.button={}
     state.button[btn]=x
 
 #----- UI ----
@@ -49,7 +52,7 @@ if is_logged_in():
     st.write(f"### Account: {state.user.email if state.get('proxy_login') else st.user.name}")
     
     cash_bal=getattr(state.user,"cash_balance",-0.01)
-    currency=state.get('profile',{}).get('currency','-')
+    currency=curr(state.get('profile',{}).get('currency','-'))
     st.write(dedent(f"""
                     ### are you ready ?
                     * Date: {datetime.now()}
@@ -57,7 +60,7 @@ if is_logged_in():
     """))
 
     with st.container(horizontal=True):
-        if st.button('Click here to Buy or Sell'):
+        if st.button('Select investment to Buy or Sell'):
             ticker= lookup_shares()
         if st.button('Cancel'):
                 state.ticker=None            
@@ -67,6 +70,7 @@ if is_logged_in():
         st.write(f"## {state.ticker}")
         portfolio=state.user.get_portfolio()
         state['quote']=get_quote(state.ticker)
+        
         show_quote(state['quote'])
         
         try: avl_qty=portfolio.query("ticker==@state.ticker").loc[0,'quantity']
@@ -79,7 +83,7 @@ if is_logged_in():
         amt=st.number_input("Value", value=round(qty*price,2), min_value=1.0, disabled=True)
 
 
-        if state['quote']['currency']=='INR':
+        if get_state('quote',{'currency':''})['currency']=='INR':
             with st.container(horizontal=True):
                 if st.button("Buy",
                              disabled=state.user.cash_balance<=amt,

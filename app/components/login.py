@@ -1,6 +1,7 @@
 import os
 import streamlit as st
 from lib.user import User
+from lib import read_file
 state=st.session_state
 
 def is_logged_in():
@@ -86,27 +87,26 @@ def call_menu():
     menu_options=["Logout","Feedback",'Session Trace',"Withdraw", "Delete Account"]
     menu=state.get('menu')
     state.menu=st.selectbox("Menu",options=menu_options,
-                            index=menu_options.index(menu) if menu else None)
+                            index=menu_options.index(menu) if menu else 0)
     
-    if menu=="Logout":
+    if state.menu=="Logout":
         if st.button("Really Log out?"):
             st_login("logout")
-    elif menu=='Feedback':
-        st.write(f"Write your feedback here {os.getenv('FEEDBACK_URL')}")
-    elif menu=='Session Trace':
+    elif state.menu=='Feedback':
+        st.link_button("Click here for your feedback",os.getenv('FEEDBACK_URL'),icon="👁️‍🗨️")
+    elif state.menu=='Session Trace':
         st.write(f"st.session_state")
         st.write(st.session_state)
     else:
-        if menu:
+        if state.menu:
             st.write('Not implemented.  Please be patient.')
         else:
             st.write("Select a menu option")
 
-    # st.rerun()
+    # st.rerun(scope="fragment")
 
-from lib import read_file
 def please_register():
-    # st.image("app/assets/cheque.avif",
-    #          width=300)
+    st.image("app/assets/cheque.png",
+             width=300)
     st.write(read_file("app/texts/please_register.md"))
     

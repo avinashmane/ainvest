@@ -17,3 +17,9 @@ dependencies = [
     "streamlit>=1.50.0",
     "yfinance>=0.2.66",
 ]
+
+[dependency-groups]
+dev = [
+    "ipywidgets>=8.1.7",
+    "pytest>=8.4.2",
+]

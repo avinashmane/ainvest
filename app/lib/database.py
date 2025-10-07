@@ -6,7 +6,8 @@ from google.oauth2.service_account import Credentials
 import json
 
 cred_json=json.loads(os.getenv("GOOGLE_CRED_JSON"))
-creds=Credentials.from_service_account_info(cred_json)
+try: creds=Credentials.from_service_account_info(cred_json)
+except Exception as e : print(f"Error creds {e!r}")
 db_client=Client(credentials=creds)
 # Setup in-memory database
 # db = InMemoryDb()
