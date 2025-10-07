@@ -18,6 +18,9 @@ yfinance_agent = Agent(
 		"When returning numbers, include the ticker and timeframe used."
 	],
 	markdown=True,
-	exponential_backoff=True
+    session_state={ "ticker":None, "transaction": None},
+	exponential_backoff=True,
+    add_session_state_to_context=True,  # Required so the agent is aware of the session state
+    enable_agentic_state=True,  # Adds a tool to manage the session state
 )
 

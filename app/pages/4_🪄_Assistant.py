@@ -20,7 +20,7 @@ from components.sidebar import sidebar, sidebar_assistant
 from components.login import is_logged_in
 with st.sidebar:
     sidebar()
-    sidebar_assistant()
+    sidebar_assistant(initialize_team)
 
 if True:
 

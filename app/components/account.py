@@ -20,7 +20,7 @@ def show_portfolio(df):
                     |Portfolio| {curr(x.portfolio)} |
                     """))
         st.divider()    
-    alternate(df)
+    # alternate(df)
 
     
 

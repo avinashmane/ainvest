@@ -16,6 +16,12 @@ def init_state(f,default=[]):
         st.session_state[f]=default
     return st.session_state[f]
 
+def get_state(f,default=None):
+    if f in st.session_state: 
+        return st.session_state[f]
+    else:
+        return default
+
 user={}
 
 def init_page(): 

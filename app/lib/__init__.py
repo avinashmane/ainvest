@@ -26,4 +26,6 @@ def curr(x,precision=2):
         format_str = f"{{:,.{precision}f}}" if isinstance(x, float) else "{:,}"
         return format_str.format(x)
     else:
+        if x==None:
+            return '-'
         return x
