@@ -17,11 +17,7 @@ def init_state(f,default=[]):
     return st.session_state[f]
 
 def get_state(f,default=None):
-<<<<<<< HEAD
     if f in st.session_state: 
-=======
-    if not f in st.session_state: 
->>>>>>> 54dbc99cf985bf0a4a90b6cbcccb75907df3a6b8
         return st.session_state[f]
     else:
         return default

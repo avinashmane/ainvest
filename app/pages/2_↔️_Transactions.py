@@ -81,8 +81,8 @@ if is_logged_in():
         price=st.number_input("Price", value=round(state['quote']['lastPrice'],2), min_value=1.0, disabled=True)
 
         amt=st.number_input("Value", value=round(qty*price,2), min_value=1.0, disabled=True)
-        if st.button('Check'):
-            st.write(f"Symbol: {ticker}")
+        if st.button('Check',type="primary"):
+            st.write(f"Transaction --> Symbol: {state.ticker}, Quantity: {qty}, Price: {curr(price)},  Total Amount: {curr(amt)}")
 
 
         if get_state('quote',{'currency':''})['currency']=='INR':
@@ -100,10 +100,13 @@ if is_logged_in():
             if status:=state.button.get('tx'):
                 st.write(status)
                 if 'completed' in state.button.get('tx'):
-                    st.write("Your transaction completed.  Ready for next transaction?")
+                    # st.write("Your transaction completed.  ")
                     list_transactions()
                 # st.page_link("pages/2_↔️_Transactions.py", label="Click here to Buy/Sell", icon="↔️") 
-            
+                    if st.button('Ready for next transaction?'):
+                        set_status('tx',{})
+                        state.ticker=''
+                        st.rerun()
                     
         
     else:
