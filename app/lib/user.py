@@ -63,7 +63,7 @@ class User:
         return pd.DataFrame(data )[self.tx_cols] if len(data) \
             else pd.DataFrame([],columns=self.tx_cols)
     
-    def get_portfolio(self):
+    def get_portfolio(self) -> pd.DataFrame:
         data=self.list_transactions()
         if len(data):
             df=data[self.tx_cols[:3]].groupby(['ticker']).sum().reset_index()

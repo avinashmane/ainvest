@@ -10,7 +10,10 @@ def is_logged_in():
             return True
         else:
             return False
-        
+
+def get_logged_email():
+    return getattr(st.user,'email')
+
 def show_login():
     if not is_logged_in():
         login_screen()
@@ -18,8 +21,9 @@ def show_login():
         logged_in()
         call_menu()
 
+
 def login_set_state(email=None):
-        logged_user=getattr(st.user,'email')
+        logged_user=get_logged_email()
         print("Logged,state email >>>",logged_user,email)
         if email:
             state.email=email

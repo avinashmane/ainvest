@@ -4,15 +4,17 @@ from lib import curr
 from millify import millify
 
 def show_portfolio(df):
-    df=df.sort_values('total',ascending=False).reset_index(drop=True).fillna('')
     
+    df=df.sort_values('total',ascending=False).reset_index(drop=True).fillna('')
+
     for i,x in df.iterrows():
         with st.container(horizontal=True,):
+            name = x.get('name')  or x.id.split("@")[0]
             st.header(f"{i+1}")
             with st.container(width=250):
                 st.write(dedent(f"""
                     ## :yellow[{curr(x.total,0)}]
-                    #### {x.id} 
+                    #### {name} 
                     """))
             st.write(dedent(f"""
                     | Total| {curr(x.total)} |

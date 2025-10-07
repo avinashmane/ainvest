@@ -3,7 +3,7 @@ import yaml
 import time
 from agents.team import initialize_team
 from agno.agent import RunOutput # Added for type hinting
-
+from rich.pretty import pprint
 from textwrap import dedent
 from components.login import login_screen, logged_in
 from page_common import user
@@ -59,20 +59,21 @@ if True:
             full_response = ""
             try:
                 # Use stream=True for the team run
-                response_stream: RunOutput = st.session_state.team.run(user_query, stream=True) # Ensure type hint Iterator[RunResponse]
+                with st.spinner():
+                    response_stream: RunOutput = st.session_state.team.run(user_query, stream=True) # Ensure type hint Iterator[RunResponse]
 
-                for i,run_event in enumerate(response_stream):
-                    # Check if content is present and a string
-                    # print(f"{i}> ",run_event)
-                    if run_event.content and isinstance(run_event.content, str):
-                        if run_event.event in ['Run-Content','TeamRunContent']:
-                            full_response += run_event.content
-                            message_placeholder.markdown(full_response + "▌") # Add cursor effect
-                        else:
-                            if hasattr(st.session_state,'log'): st.session_state.log.append(run_event)
-                            else: st.session_state.log=[run_event]
+                    for i,run_event in enumerate(response_stream):
+                        # Check if content is present and a string
+                        pprint(run_event)
+                        if run_event.content and isinstance(run_event.content, str):
+                            if run_event.event in ['Run-Content','TeamRunContent']:
+                                full_response += run_event.content
+                                message_placeholder.markdown(full_response + "▌") # Add cursor effect
+                            else:
+                                if hasattr(st.session_state,'log'): st.session_state.log.append(run_event)
+                                else: st.session_state.log=[run_event]
 
-                message_placeholder.markdown(full_response) # Final response without cursor
+                    message_placeholder.markdown(full_response) # Final response without cursor
 
                 # Update memory debug information for display
                 if hasattr(st.session_state.team, 'memory') and hasattr(st.session_state.team.memory, 'messages'):

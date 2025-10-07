@@ -11,9 +11,8 @@ from box import Box
 state=st.session_state
 
 #--- code ----
-
 def set_txn_status(x=None):
-    print(f'set_txn_status({x}')
+    # print(f'set_txn_status({x})')
     if not 'transaction' in state:
         state.transaction={"status":'ready'}
     state.transaction['status']=x
@@ -65,7 +64,7 @@ def transaction_completed():
             list_transactions()
 
 def buy_sell_button(tx_type,btn_type,qty,price,amt,condition):
-            print("buy_sell_button {} {} {}".format(tx_type,state.transaction.status, condition or ('check' not in status)))
+            # print("buy_sell_button {} {} {}".format(tx_type,state.transaction.status, condition or ('check' not in status)))
             if st.button(tx_type,  type= btn_type,
                         disabled = condition or ('check' not in state.transaction.status)  ):
                 set_txn_status(f'{tx_type} triggered')
@@ -76,6 +75,7 @@ def buy_sell_button(tx_type,btn_type,qty,price,amt,condition):
                 amt+=avl_qty
 
 #----- UI ----
+
 from components.sidebar import sidebar
 from components.login import is_logged_in, please_register
 with st.sidebar:
