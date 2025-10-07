@@ -13,9 +13,19 @@ if is_logged_in():
         state.admin=st.toggle(":blue[Admin mode]") 
 
 if ('admin' in state) and state.admin:
-    from components.admin import admin
-    admin()
-    
+    if st.button('btn1'):
+        if st.button('btn1.1'):
+            if st.button('btn1.1.1'):
+                st.write('1.1.1')
+            else:
+                st.write('1.1.-1')
+        else:
+            st.write('btn1n2')
+    else:
+        if st.button('btn_n1'):
+            st.write('btn_n1_2')
+        else:
+            st.write('btn_n1_2') 
 else:
     st.header("Information")
     

@@ -8,13 +8,15 @@ def lookup_tickers(profile, ticker):
                 recommended = 30,
                 news_count=0,
                 enable_fuzzy_query=True).all
-    quotes=[x for x in lst["quotes"] if (x["isYahooFinance"]==True) 
+    if 'quotes' in lst:
+        quotes=[x for x in lst["quotes"] if (x["isYahooFinance"]==True) 
             and (x["exchange"] in profile.get('exchanges',["BSE","NSI"]))]
-            
-    return quotes
+        return quotes        
+    return []
 
 @lru_cache(maxsize=128)
 def get_quote(ticker):
     t = yf.Ticker(ticker)
-    return pick(t.fast_info,
-                ['currency', 'dayHigh', 'dayLow', 'exchange', 'lastPrice', 'previousClose','timezone'])
+    keys=['currency', 'dayHigh', 'dayLow', 'exchange', 'lastPrice', 'previousClose','timezone']
+    fast_info=t.fast_info
+    return {f:fast_info.get(f) for f in keys}

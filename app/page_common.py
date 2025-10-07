@@ -40,7 +40,7 @@ def init_page():
     # for transactions
     init_state('ticker',None)
     init_state('quote',Box())
-    init_state('button',Box())
+    init_state('transaction',Box({'status':''}))
     init_state('log',Box())
     init_state('menu','Logout')
 
