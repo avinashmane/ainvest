@@ -15,3 +15,4 @@ db_client=Client(credentials=creds)
 # 
 db = FirestoreDb(db_client=db_client)
 # db = FirestoreDb(project_id=os.getenv('PROJECT_ID','ainvest-avi'))
+

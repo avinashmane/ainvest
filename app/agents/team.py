@@ -2,7 +2,7 @@ import streamlit as st
 from agno.team import Team
 from lib.model import model
 from lib.database import db
-
+from box import box_from_file
 # --- Agent Definitions ---
 # Define specialized agents
 from agents.general import general_agent
@@ -45,6 +45,20 @@ def get_portfolio(email: str) -> dict:
     pf = User(email).get_portfolio()
     return pf.to_dict()
 
+@tool(tool_hooks=[logger_hook],)                       # Hook to run before and after execution
+def list_transactions(email: str) -> dict:
+    """
+    Use this function to get the buys sell transaction stocks/assets along with quantity and buy price.
+    Amount should be reversed in sign and called cost basis. Total Value amd Gain at bottom.
+    Args:
+        email: str -> Email of the person
+
+    Returns:
+        pd.DataFrame: Returning dataframe.
+    """
+    pf = User(email).list_transactions()
+    return pf.to_dict()
+
 @tool(tool_hooks=[logger_hook],)
 def get_my_email() -> str:
     """
@@ -57,6 +71,43 @@ def get_my_email() -> str:
     return email
 
 @tool(tool_hooks=[logger_hook],)
+def buy_sell_transaction(email: str, 
+                         buy_or_sell: str, 
+                         ticker: str, 
+                         quantity: int, 
+                         price: float, 
+                         amount: float) -> str:
+    """
+    Use this function to buy or sell ticker symbol of share or fund for specific quantity.  
+    Price is taken from yfinance tools. Date is always taken from today.
+
+    arg:
+    * email: email id of the person buying
+    * buy_or_sell: str - Buy or Sell with exact text
+    * ticker: str - symbol that can be found on yahoo finance
+    * Quantity: int - normally multiple of 100 but allow only a positive number .
+    * price: float - has to be lastPrice
+    * amount: float -  arithmetic multiplicate of above quantity and price
+
+    Returns:
+        str: transaction confirmation (in format oftimestamp) or error message
+    """
+    user=User(email)
+    if price*quantity != amount:
+        err='Exception(Quanty {}* price {}!= amount {})'.format(quantity,price,amount)
+        print( err )
+        return f'Sorry error in transaction {err}'    
+    
+    if buy_or_sell=='Sell': 
+        quantity=-quantity
+    
+    try:
+        ret = user.add_transaction(ticker,quantity,price,price*quantity)
+        return ret
+    except:
+        return 'Sorry functionaliy not yet implemented {}'
+
+@tool(tool_hooks=[logger_hook],)
 def get_profile(email) -> dict:
     """
     Use this function to profile for the email, including cash balance.
@@ -67,11 +118,13 @@ def get_profile(email) -> dict:
     Returns:
         Profile -> Dict : Exchanges, currency and balances
     """
-    email=User(email).get_profile()
-    print(email)
-    return email
+    profile=User(email).get_profile()
+    return profile
 
 # --- Team Initialization (in Session State) ---
+# with open() as f:
+cfg=box_from_file("app/texts/agent_team_config.yaml")
+
 def initialize_team():
     """Initializes or re-initializes the investment team."""
     st.session_state.log = []
@@ -93,31 +146,12 @@ def initialize_team():
         ],
         tools=[
             get_portfolio, 
+            list_transactions,
+            buy_sell_transaction,
             get_profile,
             get_my_email, ],
-        description="Coordinates specialists to handle investment inquiry tasks.",
-        instructions=[
-            "Analyze the query and assign tasks to specialists.",
-            "Delegate based on task type:",
-            "- Web searches: InternetSearcher",
-            "answer about logged in user, the transactions, portfolio etc."
-            # "- URL content: WebCrawler",
-            # "- YouTube videos: YouTubeAnalyst",
-            # "- Emails: EmailAssistant",
-            # "- GitHub queries: GitHubResearcher",
-            # "- Hacker News: HackerNewsMonitor",
-            "- Finance new, Stock quote, Share information: yfinance"
-            "- General or chart: GeneralAssistant",
-            "if file path is program starting with charts, please show it as image in the markdown",
-            "Positive sentiment to be shown in green and negative with red",
-            "Colored text and background colors for text, using the syntax :color[text to be colored] "
-            "Show ammouts with 0 digits after deciman, and show thousans separator for all numbers.",
-            "Cite sources and maintain clarity.",
-            "Always check previous conversations in memory before responding.",
-            "total value = value of portfolio holding + cash balance"
-            "When asked about previous information or to recall something mentioned before, refer to your memory of past interactions.",
-            "Use all relevant information from memory when answering follow-up questions."
-        ],
+        description= cfg.description,
+        instructions= cfg.instructions,
         # success_criteria="The user's query has been thoroughly answered with information from all relevant specialists.",
         enable_agentic_memory=True,      # Coordinator maintains context
         share_member_interactions=True, # Members see previous member interactions in context

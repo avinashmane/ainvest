@@ -1,7 +1,7 @@
 import streamlit as st
 from components.login import is_logged_in
 from page_common import state
-
+from components.pvt_pf import show_pvt
 #----- UI ----
 from components.sidebar import sidebar
 
@@ -10,9 +10,10 @@ with st.sidebar:
 
 if is_logged_in():
     if ('avinashmane' in st.user.email) or ( state.profile.get('admin') ):
-        state.admin=st.toggle(":blue[Admin mode]") 
+        state.admin=st.toggle(":blue[Private]",value=True) 
 
 if ('admin' in state) and state.admin:
+    show_pvt()
     if st.button('btn1'):
         if st.button('btn1.1'):
             if st.button('btn1.1.1'):

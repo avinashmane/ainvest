@@ -117,7 +117,7 @@ if is_logged_in():
 
     with st.container(horizontal=True):
         if st.button('Select stock/fund to Buy or Sell', 
-                     type="secondary" if state.transaction.ticker else "primary"):
+                     type="secondary" if state.transaction.get('ticker') else "primary"):
             set_txn_status('')
             ticker= ticker_get()
 
@@ -132,11 +132,9 @@ if is_logged_in():
             st.page_link(f"https://finance.yahoo.com/quote/{state.transaction.ticker}/",label="Research")
             # if st.button('Quote'):
             #     show_quote_popup(state.quote)
-
         
         state['quote']=get_quote(state.transaction.ticker)
         show_quote(state['quote'])
-        
         
         avl_qty= 0
         qty=st.number_input("Quantity", value=100, min_value=1)

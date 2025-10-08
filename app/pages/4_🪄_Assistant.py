@@ -5,7 +5,7 @@ from agents.team import initialize_team
 from agno.agent import RunOutput # Added for type hinting
 from rich.pretty import pprint
 from textwrap import dedent
-from components.login import login_screen, logged_in
+from components.login import login_screen, logged_in_hook
 from page_common import user
 
 # Set Streamlit page configuration
@@ -64,7 +64,7 @@ if True:
 
                     for i,run_event in enumerate(response_stream):
                         # Check if content is present and a string
-                        pprint(run_event)
+                        # pprint(run_event)
                         if run_event.content and isinstance(run_event.content, str):
                             if run_event.event in ['Run-Content','TeamRunContent']:
                                 full_response += run_event.content

@@ -4,6 +4,27 @@ from lib.user import User
 from lib import read_file
 state=st.session_state
 
+
+def show_login():
+    if not is_logged_in():
+        login_screen()
+    else:
+        logged_in_hook()
+        logged_in_menu()
+
+def login_screen():
+    st.subheader("This app is needs a login and it's free.")
+    st.button("Log in with Google", 
+              on_click=st_loginout_button)
+    
+
+def st_loginout_button(x='login'):
+    if x=='logout':
+        logout_hook()
+        return st.logout()
+    else:
+        return st.login(provider='google')
+
 def is_logged_in():
     if 'is_logged_in' in st.user:
         if st.user.is_logged_in:
@@ -13,13 +34,6 @@ def is_logged_in():
 
 def get_logged_email():
     return getattr(st.user,'email')
-
-def show_login():
-    if not is_logged_in():
-        login_screen()
-    else:
-        logged_in()
-        call_menu()
 
 
 def login_set_state(email=None):
@@ -32,15 +46,18 @@ def login_set_state(email=None):
             state.name=st.user.name
         state.user=User(state.email)
         state.profile=state.user.get_profile()
-        state.proxy_login= state.email != st.user.email
+        state.proxy_login = state.email != st.user.email
  
 
-def logged_in():
+def logged_in_hook():
 
     try:
         login_set_state(state.email if 'email' in state else None)
-        updates= {} if 'name' in state.profile else {"name": state.name}
-        state.user.update(**updates) #**state.profile    
+
+        if not state.proxy_login and \
+            (not 'name' in state.profile): # not proxy and user not found
+            updates= {"name": state.name}
+            state.user.update(**updates) #**state.profile    
 
         if state.get('proxy_login'):
             st.write(f"""Email: {state.email}""")
@@ -58,26 +75,13 @@ def logged_in():
         print(f"Error logged_in(): {e!r}")
     except Exception as e:
         print(f"Error logged_in(): {e!r}")
-
-    
-
-    
     # Hide the deploy button
 
-def st_login(x='login'):
-    if x=='logout':
-        state.user=None
-        state.email=None
-        state.profile={}
-        return st.logout()
-    else:
-        return st.login(provider='google')
+def logout_hook():
+    state.user=None
+    state.email=None
+    state.profile={}
 
-def login_screen():
-    st.subheader("This app is needs a login and it's free.")
-    st.button("Log in with Google", 
-              on_click=st_login)
-    
 def register():
     st.write("To receive investment funds:")
     if not 'profile' in state:
@@ -89,7 +93,7 @@ def register():
             st.rerun()
 
 @st.fragment
-def call_menu():
+def logged_in_menu():
     menu_options=["Logout","Feedback",'Session Trace',"Withdraw", "Delete Account"]
     menu=state.get('menu')
     state.menu=st.selectbox("Menu",options=menu_options,
@@ -97,7 +101,7 @@ def call_menu():
     
     if state.menu=="Logout":
         if st.button("Really Log out?"):
-            st_login("logout")
+            st_loginout_button("logout")
     elif state.menu=='Feedback':
         st.link_button("Click here for your feedback",os.getenv('FEEDBACK_URL'),icon="👁️‍🗨️")
     elif state.menu=='Session Trace':
