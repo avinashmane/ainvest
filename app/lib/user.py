@@ -102,6 +102,8 @@ class Accounts:
             except:
                 pf_value=0
             return pf_value
+        
+        ## method
         try:
             users=Accounts.list_users()
             users['portfolio'] = users.apply(get_pf_value,axis=1)

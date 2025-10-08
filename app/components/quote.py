@@ -14,14 +14,20 @@ def show_quote(quote):
             else val
     
     md=dedent("""
+        * {}  
         * {} {} {}
         * Day Range: {} <-> {} 
         * Last/Close: {} / {}
-        """).format(get("exchange"),
-                   get("currency") ,
-                   get("timezone"),
-                   get("dayLow"),                       get("dayHigh"),
-                   get("lastPrice"),                    get("previousClose")
+        """).format(get('name'), get('ticker'),
+                    get("exchange"),
+                    get("currency") ,
+                    get("timezone"),
+                    get("dayLow"),                       get("dayHigh"),
+                    get("lastPrice"),                    get("previousClose")
                    )
     st.markdown(md)
+    
+@st.dialog('Quote')
+def show_quote_popup(quote):
+    return show_quote(quote)
     

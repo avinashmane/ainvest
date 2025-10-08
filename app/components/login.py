@@ -80,11 +80,13 @@ def login_screen():
     
 def register():
     st.write("To receive investment funds:")
-    if st.button("Register") and (not 'profile' in state):
-        # with st.spinner():
-        state.user.create()
-        state.profile=state.user.get_profile()
-        st.rerun()
+    if not 'profile' in state:
+        code=st.text_input("Registration code", placeholder="Use code ONECRORE")
+        if st.button("Register", type="primary"):
+            # with st.spinner():
+            state.user.create()
+            state.profile=state.user.get_profile()
+            st.rerun()
 
 @st.fragment
 def call_menu():

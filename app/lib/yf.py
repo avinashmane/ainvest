@@ -1,6 +1,8 @@
 import yfinance as yf
 from pydash import pick
-from functools import lru_cache
+# from functools import lru_cache,cache
+from cachetools import TTLCache,cached
+
 
 def lookup_tickers(profile, ticker):
     lst=yf.Search(ticker,
@@ -14,9 +16,23 @@ def lookup_tickers(profile, ticker):
         return quotes        
     return []
 
-@lru_cache(maxsize=128)
+@cached(cache=TTLCache(maxsize=1024, ttl=60))
 def get_quote(ticker):
+
     t = yf.Ticker(ticker)
-    keys=['currency', 'dayHigh', 'dayLow', 'exchange', 'lastPrice', 'previousClose','timezone']
-    fast_info=t.fast_info
-    return {f:fast_info.get(f) for f in keys}
+    keys=['name','currency', 'dayHigh', 'dayLow', 'exchange', 'lastPrice', 'previousClose','timezone']
+    info=t.info
+
+    quote_info = { f:info.get(f) for f in keys}
+    # print( {f:info.get(f) for f in info.keys() if 'name' in f }) #
+    quote_info['ticker']=ticker
+
+    name = info.get("shortName")
+    if name and (name!=ticker):
+        quote_info['name']=name
+    else:
+        quote_info['name'] = info.get("longName")
+
+    if not quote_info['lastPrice']: 
+        quote_info['lastPrice'] = quote_info['previousClose']
+    return quote_info

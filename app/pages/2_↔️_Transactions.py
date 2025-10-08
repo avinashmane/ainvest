@@ -7,6 +7,7 @@ from lib import curr
 from page_common import get_state, init_state
 from lib.user import User
 from box import Box
+from components.quote import show_quote_popup
 
 state=st.session_state
 
@@ -32,9 +33,6 @@ def ticker_get():
 def ticker_clear():
     state.transaction.ticker=None    
     set_txn_status('')     
-     
-def get_portfolio():
-    return state.user.get_portfolio()
 
 def list_transactions():
     st.subheader("Transactions")
@@ -92,17 +90,27 @@ def transaction_check():
             set_txn_status('ready')
             st.rerun()
 
+def get_avl_qty(st_empty):
+    portfolio=state.user.get_portfolio()
+    try: 
+        avl_qty= portfolio.query("ticker==@state.transaction.ticker").iloc[0,:]['quantity']
+    except: 
+        avl_qty=0 
+    with st_empty.container():
+        st.number_input("Available Quantity", value=avl_qty, disabled=True)
+    return avl_qty
+
 if is_logged_in():
 
     st.title(f"Transactions")
-    st.write(f"### Account: {state.user.email if state.get('proxy_login') else st.user.name}")
     
     cash_bal=getattr(state.user,"cash_balance",-0.01)
     currency=get_state('profile',{}).get('currency','-')
     init_state('transaction',Box({'status':'', 'ticker':None}))
     status=state.transaction.status
+
     st.write(dedent(f"""
-                    ### are you ready ?
+                    * Account: {state.user.email if state.get('proxy_login') else st.user.name}
                     * Date: {datetime.now()}
                     * Cash: {curr(cash_bal)} {currency}
                     """))
@@ -119,19 +127,18 @@ if is_logged_in():
 
     if 'ticker' in state.transaction and state.transaction.ticker:    
 
-        st.write(f"## {state.transaction.ticker}")
+        with st.container(horizontal=True):
+            st.write(f"## {state.transaction.ticker}")
+            st.page_link(f"https://finance.yahoo.com/quote/{state.transaction.ticker}/",label="Research")
+            # if st.button('Quote'):
+            #     show_quote_popup(state.quote)
 
-        portfolio=get_portfolio()
+        
         state['quote']=get_quote(state.transaction.ticker)
         show_quote(state['quote'])
         
-        try: 
-            avl_qty= portfolio.query("ticker==@state.transaction.ticker").iloc[0,:]['quantity']
-        except: 
-            avl_qty= 0
         
-        st.number_input("Available Quantity", value=avl_qty, disabled=True)
-        
+        avl_qty= 0
         qty=st.number_input("Quantity", value=100, min_value=1)
         price=st.number_input("Price", value=round(state['quote']['lastPrice'],2), min_value=1.0, disabled=True)
 
@@ -142,8 +149,10 @@ if is_logged_in():
             transaction_check()      
              
             if 'check' in state.transaction.status:
+                with st.spinner():
+                    avl_qty = get_avl_qty(st.empty())
                 amt=st.number_input("Value", value=amt, min_value=1.0, disabled=True)
-
+                
                 st.write("Transaction ➡️ Symbol: **{}**, Quantity: **{}**, Price: {},  Total Amount: **{}**"
                             .format(state.transaction.ticker, qty, curr(price), curr(amt)))  
 
@@ -158,9 +167,10 @@ if is_logged_in():
                 transaction_completed()
 
     else:
-        list_transactions()
+        if st.button("Show transactions"):
+            list_transactions()
 else:
     please_register()
 
 
-# st.write(state.transaction)
+# st.write(state.get('quote'))
