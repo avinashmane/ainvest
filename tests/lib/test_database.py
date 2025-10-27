@@ -56,9 +56,9 @@ class TestDatabase(unittest.TestCase):
             for doc in cities.list_documents():
                 for coll in doc.collections():
                     for subdoc in coll.list_documents():
-                        print(subdoc.path)#get().to_dict()) 
+                        # print(subdoc.path)#get().to_dict()) 
                         subdoc.delete()
-                print(doc.path)
+                # print(doc.path)
                 doc.delete()
         except Exception as e:
             self.fail( f'failed SF  {e!r}')

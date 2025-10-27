@@ -1,7 +1,9 @@
 VENV_BIN=/home/avinash/ainvest/.venv/bin
+APP_PATH=/home/avinash/ainvest/app
 IMAGE=ainvest
 SERVICE_NAME=ainvest
 IMAGE_NAME=us-central1-docker.pkg.dev/run-pix/runpix/ainvest
+export PYTHONPATH = ${APP_PATH}
 
 dev:
 	dotenv run uv run streamlit run app/Home.py --server.headless true
@@ -10,9 +12,11 @@ dev_:
 
 test: test_database test_user
 	@echo test
-test_%:
-	$(VENV_BIN)/python -m unittest tests/lib/test_$*.py
-
+test_%: 
+	echo ${APP_PATH}
+	dotenv run  $(VENV_BIN)/python -m unittest tests/lib/test_$*.py
+test_cur: 	
+	dotenv run  $(VENV_BIN)/python -m unittest tests.lib.test_user.TestAccounts
 
 build:
 	docker build . -t ${IMAGE_NAME}

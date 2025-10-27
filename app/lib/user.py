@@ -14,7 +14,7 @@ default_profile={
 class User:
     
     profile={}
-    tx_cols="ticker amount quantity date price".split()
+    tx_cols="ticker amount quantity date price type".split()
     def __init__(self, email,db_client=None):
         self.email=email
         if db_client == None:
@@ -46,24 +46,32 @@ class User:
         self.profile['cash_balance']+=amount
         self.db_client.document(f'users/{self.email}'
                                 ).update(self.profile)
-        timestamp=now()
-        ret = self.db_client.document(f'users/{self.email}/tx/{timestamp}'
-                                           ).set(dict(date=now(),
-                                                         ticker=ticker,
-                                                         quantity=quantity,
-                                                         price=price,
-                                                         amount=amount))
-        return timestamp
+        
+        if quantity * price == -amount:
+            timestamp=now()
+            ret = self.db_client.document(f'users/{self.email}/tx/{timestamp}'
+                                            ).set(dict( date=now(),
+                                                        ticker=ticker,
+                                                        quantity=quantity,
+                                                        price=price,
+                                                        amount=amount))
+            return timestamp
+        else:
+            raise Exception('For Buy: use -ve amount n +qty, for Sell use +ve amount n -qty')
     
     def list_transactions(self):
         data=[x.get().to_dict() for x in 
                 self.db_client.collection(f'users/{self.email}/tx'
                                            ).list_documents()]
-        # print(f'users/{self.email}/tx', data)
-        return pd.DataFrame(data )[self.tx_cols] if len(data) \
-            else pd.DataFrame([],columns=self.tx_cols)
+        for tx in data:
+            tx['type']='Buy' if tx['quantity']>0 else 'Sell'
+
+        if len(data):
+            return pd.DataFrame(data )[self.tx_cols] 
+        else:
+            return pd.DataFrame([],columns=self.tx_cols)
     
-    def get_portfolio(self) -> pd.DataFrame:
+    def get_portfolio(self, ) -> pd.DataFrame:
         data=self.list_transactions()
         if len(data):
             df=data[self.tx_cols[:3]].groupby(['ticker']).sum().reset_index()
@@ -71,15 +79,31 @@ class User:
             df['lastPrice']=df.apply(lambda r: get_quote(r['ticker']).get('lastPrice'), axis=1)
             df['value']=df['lastPrice']*df['quantity']
             df['gain']=df['value']+df['amount']
-            
-            # print(df)
             return df
         else:
             return pd.DataFrame()
-    
+
+    def update_cash_balance(self, 
+                            start_bal: float= 1_00_00_000, 
+                            txs= None) -> float:
+        if not txs:
+            txs=self.list_transactions()
+        cost_basis=- txs.amount.sum().tolist()
+        cash_balance=start_bal - cost_basis
+        
+        if cash_balance!=self.cash_balance:
+            print(f"updating cash balance {self.cash_balance}->{cash_balance}",
+            self.db_client.document(f'users/{self.email}'
+                                        ).update({"cash_balance":cash_balance}))
+        return cash_balance
+
+            
     @property
     def cash_balance(self):
-        return self.profile.get('cash_balance',default_profile["cash_balance"])
+        if (ret:=self.profile.get('cash_balance',) ) != None:
+            return ret
+        return self.get_profile().get('cash_balance',)
+               
 
         
 class Accounts:
