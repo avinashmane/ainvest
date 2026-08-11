@@ -1,0 +1,14 @@
+api:
+  # base_url: "http://localhost:8000/api"
+
+portfolio:
+  url: "https://docs.google.com/spreadsheets/d/1c4QkJmryNjxv4Ss7cRIoZSIbwJ6BYRWB9JE3-CIZ9ps/"
+  named_range: "pf_table"
+  pvt_save_cols:
+    - "Account Number"
+    - "Import_value"
+    - "Symbol"
+    - "Quantity"
+    - "Cost Basis"
+    - Description
+    - Ticker

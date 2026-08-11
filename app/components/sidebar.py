@@ -8,7 +8,6 @@ from lib import dict2md_table, read_file
 from page_common import get_state,state
 
 def sidebar():
-    st.logo("app/assets/logo.png")#,width=160,caption='AI + Invest = AInvest')
     st.header(":rainbow[AInvest]")
     show_login()
 

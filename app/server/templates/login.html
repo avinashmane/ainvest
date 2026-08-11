@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Sign in — AInvest{% endblock %}
+
+{% block nav_right %}
+  <a href="/app/login" class="text-blue-600 font-medium">Sign in</a>
+{% endblock %}
+
+{% block main_class %}min-h-screen flex items-center justify-center px-4{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-sm bg-white border border-gray-200 rounded-xl shadow-sm p-8">
+
+  <!-- Logo / heading -->
+  <div class="text-center mb-8">
+    <div class="text-4xl mb-3">📈</div>
+    <h1 class="text-2xl font-bold tracking-tight text-gray-900">AInvest</h1>
+    <p class="mt-1 text-gray-500 text-xs leading-relaxed">
+      AI-powered investment game.<br>
+      You get ₹1 Crore — make it grow.
+    </p>
+  </div>
+
+  <!-- Error banner (hidden by default, shown by JS on auth failure) -->
+  <div id="error-banner"
+       class="hidden mb-5 flex items-start gap-2 text-xs bg-red-50 border border-red-200 text-red-700 rounded-md px-3 py-2.5">
+    <span class="mt-0.5 text-red-500 flex-shrink-0">⚠</span>
+    <span id="error-msg">Authentication failed. Please try again.</span>
+  </div>
+
+  <!-- Google sign-in button — server-side OAuth 2.0 redirect flow -->
+  <a href="/auth/google/login"
+     id="btn-google"
+     class="w-full flex items-center justify-center gap-3 border border-gray-300 bg-white hover:bg-gray-50
+            text-gray-700 font-medium text-sm rounded-lg px-4 py-2.5 transition-colors shadow-sm cursor-pointer no-underline">
+    <!-- Google "G" logo SVG -->
+    <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>
+    <span id="btn-google-label">Continue with Google</span>
+  </a>
+
+  <!-- Divider -->
+  <div class="my-5 flex items-center gap-3 text-xs text-gray-400">
+    <div class="flex-1 h-px bg-gray-200"></div>
+    <span>or</span>
+    <div class="flex-1 h-px bg-gray-200"></div>
+  </div>
+
+  <!-- Email / password form -->
+  <form id="form-email" class="space-y-3">
+    <div>
+      <label class="block text-xs font-medium text-gray-700 mb-1" for="inp-email">Email</label>
+      <input id="inp-email" type="email" autocomplete="email" required
+             placeholder="you@example.com"
+             class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-gray-700 mb-1" for="inp-password">Password</label>
+      <input id="inp-password" type="password" autocomplete="current-password" required
+             placeholder="••••••••"
+             class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+    </div>
+    <button type="submit"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg px-4 py-2.5 transition-colors cursor-pointer">
+      Sign in with Email
+    </button>
+  </form>
+
+  <p class="mt-5 text-center text-xs text-gray-400">
+    By signing in you accept the
+    <a href="/terms" class="text-blue-600 underline">terms of use</a>.
+  </p>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Firebase App (compat) — used only for email/password sign-in -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<script>
+  // ── Firebase init (email/password only) ──────────────────────────────────
+  const firebaseConfig = {{ firebase_config | tojson }};
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  const errorBanner = document.getElementById("error-banner");
+  const errorMsg    = document.getElementById("error-msg");
+
+  function showError(msg) {
+    errorMsg.textContent = msg;
+    errorBanner.classList.remove("hidden");
+  }
+  function setLoading(btn, loading) {
+    btn.disabled = loading;
+    btn.classList.toggle("opacity-60", loading);
+    btn.classList.toggle("cursor-not-allowed", loading);
+  }
+
+  // After Firebase issues an ID token, POST it to the server so a session
+  // cookie can be set, then redirect to /app/home.
+  async function handleIdToken(idToken) {
+    const res = await fetch("/auth/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id_token: idToken }),
+    });
+    if (res.ok) {
+      window.location.href = "/app/home";
+    } else {
+      const data = await res.json().catch(() => ({}));
+      showError(data.detail || "Session creation failed.");
+    }
+  }
+
+  // ── Email / password ──────────────────────────────────────────────────────
+  document.getElementById("form-email").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn   = e.target.querySelector("button[type=submit]");
+    const email = document.getElementById("inp-email").value.trim();
+    const pass  = document.getElementById("inp-password").value;
+    errorBanner.classList.add("hidden");
+    setLoading(btn, true);
+    try {
+      const result = await auth.signInWithEmailAndPassword(email, pass);
+      const idToken = await result.user.getIdToken();
+      await handleIdToken(idToken);
+    } catch (err) {
+      showError(err.message || "Sign-in failed.");
+    } finally {
+      setLoading(btn, false);
+    }
+  });
+</script>
+{% endblock %}

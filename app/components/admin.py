@@ -41,8 +41,15 @@ def admin():
         profile=omit(row,'id')
         cash_balance=st.number_input("Cash Balance",
                                         value=profile['cash_balance'] if profile['cash_balance']>0 else 1_00_00_000) #'cash_balance' in profile
+        pvt_sheet_url=st.text_input("Private Sheet URL",
+                                        value=profile.get('pvt_sheet_url', ''),
+                                        placeholder="https://docs.google.com/spreadsheets/d/…")
+        pvt_named_range=st.text_input("Private Named Range",
+                                        value=profile.get('pvt_named_range', 'PF') or 'PF')
         profile.update(default_profile)
         profile['cash_balance']=cash_balance
+        profile['pvt_sheet_url']=pvt_sheet_url
+        profile['pvt_named_range']=pvt_named_range
         st.write(f"Email: {id}", profile, )
 
         if st.button("save"):

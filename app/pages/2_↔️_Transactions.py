@@ -1,7 +1,7 @@
 import streamlit as st
 from datetime import datetime
 from textwrap import dedent
-from lib.yf import lookup_tickers,get_quote
+from lib.api_client import search_tickers, get_quote
 from components.quote import show_quote
 from lib import curr
 from page_common import get_state, init_state
@@ -21,9 +21,11 @@ def set_txn_status(x=None):
 @st.dialog("Select the ticker")
 def ticker_get():
     t=st.text_input("Search for shares/funds")
-    quotes = lookup_tickers(get_state('profile'),t)
-    selected_ticker= st.selectbox("Ticker", options=[f"{q["symbol"]} - {q["shortname"]} ({q["exchDisp"]} {q["typeDisp"]})"
-                            for i,q in enumerate(quotes)])
+    profile = get_state('profile') or {}
+    quotes = search_tickers(t, exchanges=profile.get('exchanges', ['BSE', 'NSI']))
+    selected_ticker= st.selectbox("Ticker", options=[
+        f"{q['symbol']} - {q.get('shortname','?')} ({q.get('exchDisp','?')} {q.get('typeDisp','?')})"
+        for i,q in enumerate(quotes)])
     st.write("You can also enter exact symbols founds on https://finance.yahoo.com. e.g. RELIANCE.BO")
     if st.button("Select"):
         state.transaction.ticker = selected_ticker.split(" - ")[0].strip()

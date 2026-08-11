@@ -15,4 +15,8 @@ charts/
 # Environments/secrets
 .streamlit/**
 .env*
-!.env.*
+# !.env.*
+!.git*
+!.docker*
+!.dev*
+!.python*

@@ -1,14 +1,33 @@
+"""
+lib/user.py
+-----------
+Streamlit-side user model.
+
+All Firestore and yfinance I/O is delegated to the FastAPI server via
+lib.api_client.  No direct firebase-admin / yfinance imports here.
+"""
+from __future__ import annotations
+
 import pandas as pd
+from lib import api_client
+from lib.config import PVT_PF_SAVE_COLS
+
 from lib import now
 from lib.yf import get_quote
 from google.cloud import firestore
 from copy import copy
 from lib.database import db
 
+# Re-exported so other modules that do `from lib.user import PVT_PF_SAVE_COLS`
+# continue to work.
+__all__ = ["User", "Accounts", "default_profile", "PVT_PF_SAVE_COLS"]
+
 default_profile={
     "currency":"INR",
     "cash_balance": 1_00_00_000,
-    "exchanges":["BSE","NSI"]
+    "exchanges":["BSE","NSI"],
+    "pvt_sheet_url": "",
+    "pvt_named_range": "PF",
 }
 
 class User:
@@ -104,6 +123,38 @@ class User:
             return ret
         return self.get_profile().get('cash_balance',)
                
+    # ── Private portfolio (Firestore) ─────────────────────────────────────────
+
+    def load_pvt_portfolio(self) -> pd.DataFrame:
+        rows=[x.get().to_dict() for x in 
+                self.db_client.collection(f'users/{self.email}/pvt_pf'
+                                           ).list_documents()]
+        # rows = api_client.get_pvt_pf(self.email)
+        return pd.DataFrame(rows) if rows else pd.DataFrame()
+
+    def save_pvt_portfolio(self, df: pd.DataFrame) -> int:
+        present = [c for c in PVT_PF_SAVE_COLS if c in df.columns]
+        subset = df[present].copy() if present else df.copy()
+        rows = subset.to_dict(orient="records")
+        # 3. Initialize a write batch
+        batch = self.db_client.batch()
+
+        # 4. Loop through data and add to the batch
+        for i,data in enumerate(rows):
+            # Separate the custom document ID from the rest of the data
+            doc_id = data.pop(i) 
+            doc_ref = db.collection(f"users/{self.email}/pvt_pf/").document(doc_id)
+            
+            # Add the set operation to the batch
+            batch.set(doc_ref, data)
+
+        # 5. Commit all documents at once
+        batch.commit()
+        print(f"Successfully saved {len(rows)} documents.")
+        self.pvt_pf = subset
+        return len(rows)
+
+
 
         
 class Accounts:
@@ -134,3 +185,10 @@ class Accounts:
             users['total'] = users['portfolio'] + users['cash_balance'] 
         finally:
             return users
+############################################################333            
+
+
+
+
+
+

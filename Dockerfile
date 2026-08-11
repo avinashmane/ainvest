@@ -1,10 +1,11 @@
+# for Vue + fastAPI app
+
 # Use an official Python runtime as a parent image
-FROM python:3.13-slim
-ENV PORT=8501
+FROM python:3.13-slim AS base
+ENV PORT=8080
 ENV PYTHONPATH=/:/app
 # Set the working directory in the container
-WORKDIR /app
-
+# WORKDIR /app
 # Copy the dependency management files
 COPY pyproject.toml uv.lock* ./
 
@@ -17,8 +18,13 @@ RUN uv sync --no-cache
 # Copy the rest of the application code
 # COPY app .
 # COPY lib agents app/
-COPY . .
+
+# CWD = /app
+COPY ./app ./app
+# remove streamlit
+RUN rm -rf pages components assets
 COPY .streamlit/secrets_forthelife.toml .streamlit/secrets.toml
+
 # Expose the port that Streamlit runs on
 EXPOSE ${PORT}
 
@@ -26,6 +32,6 @@ EXPOSE ${PORT}
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
-CMD ["uv","run","streamlit","run","app/Home.py"]
-# CMD ["/usr/local/bin/entrypoint.sh"]
+HEALTHCHECK CMD curl --fail http://localhost:${PORT}/health
+
+CMD echo port is ${PORT} ; uv run uvicorn app.server.main:app --host 0.0.0.0 --port ${PORT}

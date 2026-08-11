@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Home — AInvest{% endblock %}
+
+{% block nav_right %}
+  <!-- Populated by JS once auth state is confirmed -->
+  <span id="nav-user-name" class="text-gray-600 hidden"></span>
+  <img id="nav-avatar" src="" alt=""
+       class="w-7 h-7 rounded-full object-cover border border-gray-200 hidden" />
+  <button id="btn-signout"
+          class="hidden text-xs font-medium px-3 py-1.5 rounded border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 transition-colors cursor-pointer">
+    Sign out
+  </button>
+{% endblock %}
+
+{% block content %}
+
+<!-- Auth guard: hidden until JS confirms the user is logged in -->
+<div id="page-content" class="hidden">
+
+  <!-- Welcome header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold tracking-tight">
+      Welcome back, <span id="display-name" class="text-blue-600">…</span>!
+    </h1>
+    <p class="text-gray-500 mt-1 text-xs" id="display-email"></p>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="grid grid-cols-2 gap-4 mb-8 sm:grid-cols-4">
+    <div class="bg-white border border-gray-200 rounded-lg px-4 py-4">
+      <p class="text-xs text-gray-400 mb-1">Portfolio Value</p>
+      <p id="card-pf-value" class="text-lg font-bold text-gray-900">—</p>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-lg px-4 py-4">
+      <p class="text-xs text-gray-400 mb-1">Cash Balance</p>
+      <p id="card-cash" class="text-lg font-bold text-gray-900">—</p>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-lg px-4 py-4">
+      <p class="text-xs text-gray-400 mb-1">Total</p>
+      <p id="card-total" class="text-lg font-bold text-gray-900">—</p>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-lg px-4 py-4">
+      <p class="text-xs text-gray-400 mb-1">Holdings</p>
+      <p id="card-holdings" class="text-lg font-bold text-gray-900">—</p>
+    </div>
+  </div>
+
+  <!-- Quick actions -->
+  <h2 class="text-sm font-semibold mb-3 text-gray-700">Quick actions</h2>
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-3 mb-10">
+    <a href="{{ streamlit_url }}/pages/1_%F0%9F%93%88_Portfolio"
+       class="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-4 py-3 hover:bg-blue-50 hover:border-blue-200 transition-colors no-underline">
+      <span class="text-xl">📈</span>
+      <div>
+        <p class="font-medium text-gray-900 text-xs">Portfolio</p>
+        <p class="text-gray-400 text-xs">View holdings &amp; P&amp;L</p>
+      </div>
+    </a>
+    <a href="{{ streamlit_url }}/pages/2_%E2%86%94%EF%B8%8F_Transactions"
+       class="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-4 py-3 hover:bg-green-50 hover:border-green-200 transition-colors no-underline">
+      <span class="text-xl">↔️</span>
+      <div>
+        <p class="font-medium text-gray-900 text-xs">Transactions</p>
+        <p class="text-gray-400 text-xs">Buy &amp; sell stocks</p>
+      </div>
+    </a>
+    <a href="{{ streamlit_url }}/pages/3_%F0%9F%8F%86_Leaderboard"
+       class="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-4 py-3 hover:bg-yellow-50 hover:border-yellow-200 transition-colors no-underline">
+      <span class="text-xl">🏆</span>
+      <div>
+        <p class="font-medium text-gray-900 text-xs">Leaderboard</p>
+        <p class="text-gray-400 text-xs">See how you rank</p>
+      </div>
+    </a>
+  </div>
+
+  <!-- Recent portfolio table (populated by JS) -->
+  <h2 class="text-sm font-semibold mb-3 text-gray-700">Holdings snapshot</h2>
+  <div id="holdings-loading" class="text-xs text-gray-400 mb-4">Loading…</div>
+  <div id="holdings-wrap" class="hidden mb-8 rounded-md border border-gray-200 overflow-hidden">
+    <table class="w-full text-xs">
+      <thead>
+        <tr class="bg-gray-50">
+          <th class="text-left text-xs font-semibold uppercase tracking-wide text-gray-400 px-4 py-2 border-b border-gray-200">Symbol</th>
+          <th class="text-left text-xs font-semibold uppercase tracking-wide text-gray-400 px-4 py-2 border-b border-gray-200">Qty</th>
+          <th class="text-right text-xs font-semibold uppercase tracking-wide text-gray-400 px-4 py-2 border-b border-gray-200">Cost Basis</th>
+        </tr>
+      </thead>
+      <tbody id="holdings-body"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Not-authenticated state -->
+<div id="page-unauth" class="hidden text-center py-20">
+  <p class="text-gray-500 mb-4">You are not signed in.</p>
+  <a href="/app/login"
+     class="inline-block bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-blue-700 transition-colors no-underline">
+    Sign in
+  </a>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<!-- Firebase App (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<script>
+  // ── Firebase init ─────────────────────────────────────────────────────────
+  const firebaseConfig = {{ firebase_config | tojson }};
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function fmt(n) {
+    if (n == null || n === "—") return "—";
+    return "₹" + Number(n).toLocaleString("en-IN", { maximumFractionDigits: 0 });
+  }
+
+  // ── Auth state ────────────────────────────────────────────────────────────
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+      document.getElementById("page-unauth").classList.remove("hidden");
+      return;
+    }
+
+    // Show page
+    document.getElementById("page-content").classList.remove("hidden");
+
+    // Nav
+    document.getElementById("nav-user-name").textContent = user.displayName || user.email;
+    document.getElementById("nav-user-name").classList.remove("hidden");
+    if (user.photoURL) {
+      const av = document.getElementById("nav-avatar");
+      av.src = user.photoURL;
+      av.classList.remove("hidden");
+    }
+    document.getElementById("btn-signout").classList.remove("hidden");
+
+    // Page header
+    document.getElementById("display-name").textContent = (user.displayName || user.email).split(" ")[0];
+    document.getElementById("display-email").textContent = user.email;
+
+    // Fetch profile + portfolio from API (requires valid session cookie set at login)
+    try {
+      const email = encodeURIComponent(user.email);
+
+      const [profileRes, pfRes, pvtRes] = await Promise.all([
+        fetch(`/users/${email}/profile`),
+        fetch(`/users/${email}/portfolio`),
+        fetch(`/users/${email}/pvt_pf`),
+      ]);
+
+      const profile  = profileRes.ok  ? await profileRes.json()  : {};
+      const gameRows = pfRes.ok        ? await pfRes.json()        : [];
+      const pvtRows  = pvtRes.ok       ? await pvtRes.json()       : [];
+
+      // Summary cards
+      const pfValue = gameRows.reduce((s, r) => s + (Number(r.value) || 0), 0);
+      const cash    = Number(profile.cash_balance) || 0;
+      document.getElementById("card-pf-value").textContent  = fmt(pfValue);
+      document.getElementById("card-cash").textContent      = fmt(cash);
+      document.getElementById("card-total").textContent     = fmt(pfValue + cash);
+      document.getElementById("card-holdings").textContent  = pvtRows.length || gameRows.length || "0";
+
+      // Holdings table (private portfolio preferred, fall back to game portfolio)
+      const rows = pvtRows.length ? pvtRows : gameRows;
+      if (rows.length) {
+        const tbody = document.getElementById("holdings-body");
+        rows.slice(0, 10).forEach((r, i) => {
+          const tr = document.createElement("tr");
+          tr.className = i % 2 === 0 ? "bg-white" : "bg-gray-50";
+          const sym  = r.Symbol  || r.ticker || "—";
+          const qty  = r.Quantity || r.quantity || "—";
+          const cost = r["Cost Basis"] || r.amount || "—";
+          tr.innerHTML = `
+            <td class="px-4 py-2 font-mono font-semibold text-gray-800">${sym}</td>
+            <td class="px-4 py-2 text-gray-600">${qty}</td>
+            <td class="px-4 py-2 text-right text-gray-600">${fmt(cost)}</td>`;
+          tbody.appendChild(tr);
+        });
+        document.getElementById("holdings-loading").classList.add("hidden");
+        document.getElementById("holdings-wrap").classList.remove("hidden");
+      } else {
+        document.getElementById("holdings-loading").textContent = "No holdings yet.";
+      }
+
+    } catch (err) {
+      console.error("Failed to load profile/portfolio:", err);
+    }
+  });
+
+  // ── Sign out ──────────────────────────────────────────────────────────────
+  document.getElementById("btn-signout").addEventListener("click", async () => {
+    await fetch("/auth/signout", { method: "POST" });
+    await auth.signOut();
+    window.location.href = "/app/login";
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-50">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}AInvest{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  {% block head %}{% endblock %}
+</head>
+<body class="h-full font-sans text-sm text-gray-900 antialiased">
+
+  <!-- Nav -->
+  <nav class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2 font-bold text-base tracking-tight text-gray-900 no-underline">
+      <span class="text-blue-600">📈</span> AInvest
+    </a>
+    <div id="nav-auth" class="flex items-center gap-3 text-xs">
+      <!-- filled by auth-nav.js or child template -->
+      {% block nav_right %}{% endblock %}
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <main class="{% block main_class %}max-w-3xl mx-auto px-6 py-10{% endblock %}">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-200 py-4 text-center text-xs text-gray-400">
+    Made with IBM Bob
+  </footer>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

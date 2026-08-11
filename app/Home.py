@@ -64,7 +64,6 @@ Slow and steady win the race!""")
 st.page_link("pages/3_🏆_Leaderboard.py", label="Leaderboard", icon="🏆")
 
 if is_logged_in():
-    # with st.container(horizontal=True):
     st.page_link("pages/1_📈_Portfolio.py", label="Check your portfolio", icon="📈")
 
 else:
