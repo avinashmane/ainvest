@@ -28,10 +28,15 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
-      path: '/portfolio',
-      name: 'portfolio',
+      path: '/pvt-portfolio',
+      name: 'pvtPortfolio',
       component: () => import('@/views/PvtPortfolioView.vue'),
       meta: { requiresAuth: true },
+    },
+    {
+      path: '/portfolio',
+      name: 'portfolio',
+      component: () => import('@/views/PublicPortfolioView.vue'),
     },
   ],
 })

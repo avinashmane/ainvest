@@ -81,12 +81,12 @@ const rangeBarPct = computed(() => {
 function fPrice(v: number | null | undefined, currency: string | null | undefined): string {
   if (v == null) return '—'
   const sym = currencySymbol(currency)
-  return `${sym}${v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  return `${sym}${v.toLocaleString(import.meta.env.VITE_APP_LOCALE, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
 function fNum(v: number | null | undefined, decimals = 2): string {
   if (v == null) return '—'
-  return v.toLocaleString('en-IN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+  return v.toLocaleString(import.meta.env.VITE_APP_LOCALE, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
 }
 
 function fPct(v: number | null | undefined): string {
@@ -101,19 +101,19 @@ function fLarge(v: number | null | undefined, currency: string | null | undefine
   if (v >= 1e9)  return `${sym}${(v / 1e9).toFixed(2)}B`
   if (v >= 1e7)  return `${sym}${(v / 1e7).toFixed(2)}Cr`
   if (v >= 1e5)  return `${sym}${(v / 1e5).toFixed(2)}L`
-  return `${sym}${v.toLocaleString('en-IN')}`
+  return `${sym}${v.toLocaleString(import.meta.env.VITE_APP_LOCALE)}`
 }
 
 function fVolume(v: number | null | undefined): string {
   if (v == null) return '—'
   if (v >= 1e7) return `${(v / 1e7).toFixed(2)}Cr`
   if (v >= 1e5) return `${(v / 1e5).toFixed(2)}L`
-  return v.toLocaleString('en-IN')
+  return v.toLocaleString(import.meta.env.VITE_APP_LOCALE)
 }
 
 function currencySymbol(c: string | null | undefined): string {
   const m: Record<string, string> = {
-    INR: '₹', USD: '$', EUR: '€', GBP: '£', JPY: '¥',
+    INR: '$', USD: '$', EUR: '€', GBP: '£', JPY: '¥',
   }
   return c ? (m[c] ?? `${c} `) : ''
 }

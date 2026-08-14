@@ -46,14 +46,14 @@ const PERIOD_OPTIONS: { label: string; value: Period }[] = [
 const isUp   = computed(() => (data.value?.change ?? 0) >= 0)
 const isDown = computed(() => (data.value?.change ?? 0) <  0)
 
-/** Formatted price, e.g. "₹2,430.50" */
+/** Formatted price, e.g. "$2,430.50" */
 const priceStr = computed(() => {
   if (!data.value) return '—'
   const { lastPrice, currency } = data.value
   return formatPrice(lastPrice, currency)
 })
 
-/** Absolute change, e.g. "+₹34.20" or "−₹12.80" */
+/** Absolute change, e.g. "+$34.20" or "−$12.80" */
 const changeStr = computed(() => {
   if (!data.value) return ''
   const { change, currency } = data.value
@@ -87,12 +87,12 @@ const periodLabel = computed(() => {
 
 function formatPrice(value: number, currency: string | null | undefined): string {
   const sym = currencySymbol(currency)
-  return `${sym}${value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  return `${sym}${value.toLocaleString(import.meta.env.VITE_APP_LOCALE, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
 function currencySymbol(currency: string | null | undefined): string {
   const map: Record<string, string> = {
-    INR: '₹', USD: '$', EUR: '€', GBP: '£', JPY: '¥',
+    INR: '$', USD: '$', EUR: '€', GBP: '£', JPY: '¥',
   }
   return currency ? (map[currency] ?? `${currency} `) : ''
 }

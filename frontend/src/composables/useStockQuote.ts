@@ -6,8 +6,7 @@
  */
 
 import { ref, watch, onUnmounted, type Ref } from 'vue'
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api'
+import { useBackend } from '@/composables/useBackend'
 
 export interface QuoteData {
   ticker: string
@@ -78,20 +77,6 @@ export interface QuoteData {
 
 export type Period = '1d' | '5d' | '1mo' | '3mo' | '6mo' | '1y' | '5y'
 
-async function fetchQuote(ticker: string): Promise<Record<string, unknown>> {
-  const res = await fetch(`${API_BASE}/quotes/${ticker}`)
-  if (!res.ok) throw new Error(`Quote fetch failed: ${res.status}`)
-  return res.json()
-}
-
-async function fetchHistoryFirstClose(ticker: string, period: Period): Promise<number> {
-  const res = await fetch(`${API_BASE}/quotes/${ticker}/history?period=${period}`)
-  if (!res.ok) throw new Error(`History fetch failed: ${res.status}`)
-  const rows: { Close: number }[] = await res.json()
-  if (!rows.length) throw new Error('Empty history')
-  return rows[0]!.Close
-}
-
 export function useStockQuote(
   ticker: Ref<string>,
   period: Ref<Period> = ref('1d'),
@@ -102,6 +87,18 @@ export function useStockQuote(
   const loading = ref(false)
   const error   = ref<string | null>(null)
   let   timer: ReturnType<typeof setInterval> | null = null
+
+  const { get } = useBackend()
+
+  async function fetchQuote(t: string): Promise<Record<string, unknown>> {
+    return get<Record<string, unknown>>(`/quotes/${t}`)
+  }
+
+  async function fetchHistoryFirstClose(t: string, period: Period): Promise<number> {
+    const rows = await get<{ Close: number }[]>(`/quotes/${t}/history?period=${period}`)
+    if (!rows.length) throw new Error('Empty history')
+    return rows[0]!.Close
+  }
 
   function n(v: unknown): number | null {
     const n = typeof v === 'number' ? v : null

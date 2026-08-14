@@ -1,27 +1,20 @@
 <script setup lang="ts">
 /**
- * PvtPortfolioView.vue
- * --------------------
- * Displays the user's private portfolio with live prices and gain metrics.
+ * PublicPortfolioView.vue
+ * -----------------------
+ * Displays the aggregated public portfolio — the net sum of all transactions
+ * stored in the background, enriched with live prices.
  *
- * Summary bar: Portfolio Value · Cost Basis · Day Gain ($ + %) · Total Gain ($ + %)
- * Holdings table: one row per holding, all gain columns coloured green/red.
- * "Ratio" toggle: aggregates rows by ticker and adds a portfolio-weight % column.
- * Auto-refreshes every 60 s (configurable).
+ * No authentication required.
+ * Data source: GET /api/portfolio
  */
 
 import { computed, ref } from 'vue'
-import { useAuthStore } from '@/stores/auth'
-import { usePvtPortfolio, type PvtHolding } from '@/composables/usePvtPortfolio'
+import { usePublicPortfolio, type PublicHolding } from '@/composables/usePublicPortfolio'
 import { fPrice, fSigned, fPct, fQty, gainClass } from '@/composables/useFormatters'
 import NavBar from '@/components/NavBar.vue'
 import PortfolioTreemap from '@/components/PortfolioTreemap.vue'
 import PortfolioPie from '@/components/PortfolioPie.vue'
-
-const auth = useAuthStore()
-
-const emailRef  = computed(() => auth.user?.email ?? null)
-const refreshMs = ref(60_000)
 
 const REFRESH_OPTIONS = [
   { label: 'Off', value: 0       },
@@ -30,122 +23,12 @@ const REFRESH_OPTIONS = [
   { label: '5m',  value: 300_000 },
 ]
 
-interface ColDef {
-  key: string
-  label: string
-  class?: string
-}
-
-const cols = ref<ColDef[]>([
-  { key: 'Ticker',       label: 'Ticker'                     },
-  { key: 'name',         label: 'Name',  class: 'hidden md:block' },
-  { key: 'weight',       label: 'Weight %'                   },
-  { key: 'Quantity',     label: 'Qty'                        },
-  { key: 'Cost Basis',   label: 'Cost Basis'                 },
-  { key: 'lastPrice',    label: 'Last Price'                 },
-  { key: 'currentValue', label: 'Value'                      },
-  { key: 'dayGain',      label: 'Day Gain $'                 },
-  { key: 'dayGainPct',   label: 'Day Gain %'                 },
-  { key: 'totalGain',    label: 'Total Gain $'               },
-  { key: 'totalGainPct', label: 'Total Gain %'               },
-])
-
-/** O(1) lookup map derived from cols — rebuilt only when cols changes. */
-const colMap = computed(() =>
-  new Map(cols.value.map(c => [c.key, c]))
-)
-
-/** Returns the value of `attr` for the column with the given `key`, or `''`. */
-function getColAttr(key: string, attr: keyof ColDef): string {
-  return colMap.value.get(key)?.[attr] ?? ''
-}
-
-const { data, loading, error, reload } = usePvtPortfolio(emailRef, refreshMs)
-
-// ── Ratio / aggregate toggle ──────────────────────────────────────────────────
-
-const showRatio = ref(false)
-
-interface AggRow {
-  Ticker: string
-  name: string | null
-  currency: string | null
-  quoteType: string | null
-  sector: string | null
-  Quantity: number
-  'Cost Basis': number
-  lastPrice: number
-  currentValue: number
-  dayGain: number
-  dayGainPct: number
-  totalGain: number
-  totalGainPct: number
-  trailingPE: number | null
-  marketCap: number | null
-  /** portfolio weight % */
-  weight: number
-}
-
-const aggregatedRows = computed<AggRow[]>(() => {
-  if (!data.value?.rows.length) return []
-
-  const totalValue = data.value.summary?.totalValue ?? 0
-  const map = new Map<string, AggRow>()
-
-  for (const row of data.value.rows) {
-    const ticker = row.Ticker || row.Symbol || '—'
-    const existing = map.get(ticker)
-
-    const qty   = typeof row.Quantity      === 'number' ? row.Quantity      : parseFloat(String(row.Quantity))      || 0
-    const cost  = typeof row['Cost Basis'] === 'number' ? row['Cost Basis'] : parseFloat(String(row['Cost Basis'])) || 0
-    const cv    = typeof row.currentValue  === 'number' ? row.currentValue  : parseFloat(String(row.currentValue))  || 0
-    const dg    = typeof row.dayGain       === 'number' ? row.dayGain       : parseFloat(String(row.dayGain))       || 0
-    const tg    = typeof row.totalGain     === 'number' ? row.totalGain     : parseFloat(String(row.totalGain))     || 0
-    const lp    = typeof row.lastPrice     === 'number' ? row.lastPrice     : parseFloat(String(row.lastPrice))     || 0
-
-    if (existing) {
-      existing.Quantity      += qty
-      existing['Cost Basis'] += cost
-      existing.currentValue  += cv
-      existing.dayGain       += dg
-      existing.totalGain     += tg
-      // last price is the same for all lots of a ticker; keep first
-    } else {
-      map.set(ticker, {
-        Ticker:         ticker,
-        name:           row.name,
-        currency:       row.currency,
-        quoteType:      row.quoteType ?? null,
-        sector:         row.sector   ?? null,
-        Quantity:       qty,
-        'Cost Basis':   cost,
-        lastPrice:      lp,
-        currentValue:   cv,
-        dayGain:        dg,
-        dayGainPct:     0,   // recalculated below
-        totalGain:      tg,
-        totalGainPct:   0,   // recalculated below
-        trailingPE:     row.trailingPE ?? null,
-        marketCap:      row.marketCap  ?? null,
-        weight:         0,   // recalculated below
-      })
-    }
-  }
-
-  // Recalculate % columns and weight from aggregated totals
-  for (const row of map.values()) {
-    const prevClose = row.currentValue - row.dayGain
-    row.dayGainPct  = prevClose !== 0 ? (row.dayGain  / prevClose)        * 100 : 0
-    row.totalGainPct = row['Cost Basis'] !== 0 ? (row.totalGain / row['Cost Basis']) * 100 : 0
-    row.weight      = totalValue !== 0 ? (row.currentValue / totalValue) * 100 : 0
-  }
-
-  return Array.from(map.values())
-})
+const refreshMs = ref(60_000)
+const { data, loading, error, reload } = usePublicPortfolio(refreshMs)
 
 // ── Sort state ────────────────────────────────────────────────────────────────
 
-type SortKey = keyof PvtHolding | 'weight'
+type SortKey = keyof PublicHolding
 const sortKey = ref<SortKey>('currentValue')
 const sortDir = ref<'asc' | 'desc'>('desc')
 
@@ -158,38 +41,27 @@ function toggleSort(key: SortKey) {
   }
 }
 
-function sortRows<T>(rows: T[]): T[] {
-  return [...rows].sort((a, b) => {
-    const rec = a as Record<string, unknown>
-    const av = rec[sortKey.value as string]
-    const bv = (b as Record<string, unknown>)[sortKey.value as string]
+const sortedRows = computed<PublicHolding[]>(() => {
+  if (!data.value?.rows.length) return []
+  return [...data.value.rows].sort((a, b) => {
+    const av = a[sortKey.value]
+    const bv = b[sortKey.value]
     const diff = typeof av === 'number' && typeof bv === 'number'
       ? av - bv
       : String(av ?? '').localeCompare(String(bv ?? ''))
     return sortDir.value === 'asc' ? diff : -diff
   })
-}
-
-const sortedRows = computed(() => {
-  if (showRatio.value) return sortRows(aggregatedRows.value)
-  if (!data.value?.rows.length) return []
-  return sortRows(data.value.rows)
 })
 
 // ── Summary shorthands
 const s        = computed(() => data.value?.summary)
 const currency = computed(() => data.value?.rows[0]?.currency ?? null)
 
-// Position count shown in header
-const positionCount = computed(() =>
-  showRatio.value ? aggregatedRows.value.length : (data.value?.rows?.length ?? 0)
-)
-
 // Last-refresh timestamp
 const lastUpdated = ref('')
 function stampNow() {
   const d = new Date()
-  lastUpdated.value = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`
+  lastUpdated.value = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`
 }
 </script>
 
@@ -203,26 +75,13 @@ function stampNow() {
       <!-- ── Page header ────────────────────────────────────────────────────── -->
       <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
         <div>
-          <h1 class="text-xl font-bold text-slate-900 tracking-tight">Private Portfolio</h1>
+          <h1 class="text-xl font-bold text-slate-900 tracking-tight">Public Portfolio</h1>
           <p class="text-xs text-slate-400 mt-0.5">
-            Live prices · 60-second server cache
+            Net aggregation of all transactions · Live prices · 60-second server cache
           </p>
         </div>
 
         <div class="flex items-center gap-3 flex-wrap">
-          <!-- Ratio toggle -->
-          <button
-            :class="[
-              'px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors',
-              showRatio
-                ? 'bg-violet-600 text-white border-violet-600'
-                : 'bg-white text-slate-600 border-slate-200 hover:border-violet-300'
-            ]"
-            @click="showRatio = !showRatio"
-          >
-            {{ showRatio ? '⊞ Ratio' : '⊞ Ratio' }}
-          </button>
-
           <!-- Refresh buttons -->
           <div class="flex items-center gap-1.5">
             <span class="text-xs text-slate-400">Refresh:</span>
@@ -321,35 +180,22 @@ function stampNow() {
           </p>
         </div>
 
-      </div>
-
-      <!-- ── Treemap (full width) ───────────────────────────────────────────── -->
-      <div v-if="aggregatedRows.length" class="mb-4">
-        <PortfolioTreemap
-          :rows="aggregatedRows"
-          :currency="currency"
-        />
-      </div>
-
-      <!-- ── Pie (full width) ───────────────────────────────────────────────── -->
-      <div v-if="aggregatedRows.length" class="mb-6">
-        <PortfolioPie
-          :rows="aggregatedRows"
-          :raw-rows="data?.rows"
-          :currency="currency"
-        />
+        <!-- Gain vs Cost bar -->
+        <div class="col-span-2 bg-white rounded-2xl border border-slate-100 px-4 py-4 flex flex-col justify-between">
+          <p class="text-[10px] text-slate-400 uppercase tracking-wide mb-2">Gain vs Cost</p>
+          <div class="flex items-center gap-2">
+            <span :class="['text-sm font-bold tabular-nums', gainClass(s.totalGainPct)]">
+              {{ fPct(s.totalGainPct) }}
+            </span>
+          </div>
+        </div>
       </div>
 
       <!-- ── Holdings table ─────────────────────────────────────────────────── -->
       <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
         <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
-          <h2 class="text-sm font-semibold text-slate-700">
-            Holdings
-            <span v-if="showRatio" class="ml-2 text-[10px] font-normal text-violet-500 uppercase tracking-wide">
-              aggregated by ticker
-            </span>
-          </h2>
-          <span v-if="data" class="text-xs text-slate-400">{{ positionCount }} positions</span>
+          <h2 class="text-sm font-semibold text-slate-700">Holdings</h2>
+          <span v-if="data" class="text-xs text-slate-400">{{ data.rows.length }} positions</span>
         </div>
 
         <!-- Table skeleton -->
@@ -363,19 +209,30 @@ function stampNow() {
 
         <!-- Empty state -->
         <div v-else-if="!data?.rows?.length && !error" class="px-5 py-12 text-center text-slate-400 text-sm">
-          No holdings found. Link a Google Sheet in your profile to import positions.
+          No public holdings found.
         </div>
 
-        <!-- ── RATIO view ─────────────────────────────────────────────────── -->
-        <div v-else-if="showRatio && sortedRows.length" class="overflow-x-auto">
+        <!-- Table -->
+        <div v-else-if="sortedRows.length" class="overflow-x-auto">
           <table class="w-full text-sm border-collapse">
             <thead>
               <tr class="text-[10px] uppercase tracking-wider text-slate-400 border-b border-slate-100">
                 <th
-                  v-for="col in cols"
+                  v-for="col in [
+                    { key: 'Ticker',       label: 'Ticker'       },
+                    { key: 'name',         label: 'Name'         },
+                    { key: 'weight',       label: 'Weight %'     },
+                    { key: 'Quantity',     label: 'Qty'          },
+                    { key: 'Cost Basis',   label: 'Cost Basis'   },
+                    { key: 'lastPrice',    label: 'Last Price'   },
+                    { key: 'currentValue', label: 'Value'        },
+                    { key: 'dayGain',      label: 'Day Gain $'   },
+                    { key: 'dayGainPct',   label: 'Day Gain %'   },
+                    { key: 'totalGain',    label: 'Total Gain $' },
+                    { key: 'totalGainPct', label: 'Total Gain %' },
+                  ]"
                   :key="col.key"
                   :class="[
-                    col.class || '',
                     'px-4 py-2.5 text-left font-medium whitespace-nowrap cursor-pointer hover:text-slate-600 select-none',
                     col.key === 'Ticker' ? 'sticky left-0 z-10 bg-white' : '',
                     col.key === 'name'   ? 'hidden sm:table-cell' : '',
@@ -391,7 +248,7 @@ function stampNow() {
             </thead>
             <tbody class="divide-y divide-slate-50">
               <tr
-                v-for="row in (sortedRows as AggRow[])"
+                v-for="row in sortedRows"
                 :key="row.Ticker"
                 class="group hover:bg-slate-50 transition-colors"
               >
@@ -412,7 +269,7 @@ function stampNow() {
                   <div class="flex items-center gap-2 min-w-[90px]">
                     <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                       <div
-                        class="h-full bg-violet-400 rounded-full"
+                        class="h-full bg-blue-400 rounded-full"
                         :style="{ width: `${Math.min(row.weight, 100)}%` }"
                       />
                     </div>
@@ -468,84 +325,8 @@ function stampNow() {
             <tfoot v-if="s" class="border-t-2 border-slate-200 bg-slate-50">
               <tr class="text-sm font-semibold">
                 <td class="px-4 py-3 text-slate-500 text-xs uppercase tracking-wide" colspan="2">Totals</td>
-                <td class="px-4 py-3 text-right tabular-nums text-violet-600">100%</td>
+                <td class="px-4 py-3 text-right tabular-nums text-blue-600">100%</td>
                 <td class="px-4 py-3" />
-                <td class="px-4 py-3 text-right tabular-nums text-slate-700">{{ fPrice(s.totalCost, currency) }}</td>
-                <td class="px-4 py-3" />
-                <td class="px-4 py-3 text-right tabular-nums text-slate-900">{{ fPrice(s.totalValue, currency) }}</td>
-                <td :class="['px-4 py-3 text-right tabular-nums', gainClass(s.totalDayGain)]">{{ fSigned(s.totalDayGain, currency) }}</td>
-                <td :class="['px-4 py-3 text-right tabular-nums', gainClass(s.totalDayGainPct)]">{{ fPct(s.totalDayGainPct) }}</td>
-                <td :class="['px-4 py-3 text-right tabular-nums', gainClass(s.totalGain)]">{{ fSigned(s.totalGain, currency) }}</td>
-                <td :class="['px-4 py-3 text-right tabular-nums', gainClass(s.totalGainPct)]">{{ fPct(s.totalGainPct) }}</td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-
-        <!-- ── DETAIL view (default) ──────────────────────────────────────── -->
-        <div v-else-if="sortedRows.length" class="overflow-x-auto">
-          <table class="w-full text-sm border-collapse">
-            <thead>
-              <tr class="text-[10px] uppercase tracking-wider text-slate-400 border-b border-slate-100">
-                <th
-                  v-for="col in [
-                    { key: 'Ticker',       label: 'Ticker'       },
-                    { key: 'name',         label: 'Name'         },
-                    { key: 'Quantity',     label: 'Qty'          },
-                    { key: 'Cost Basis',   label: 'Cost Basis'   },
-                    { key: 'lastPrice',    label: 'Last Price'   },
-                    { key: 'currentValue', label: 'Value'        },
-                    { key: 'dayGain',      label: 'Day Gain $'   },
-                    { key: 'dayGainPct',   label: 'Day Gain %'   },
-                    { key: 'totalGain',    label: 'Total Gain $' },
-                    { key: 'totalGainPct', label: 'Total Gain %' },
-                  ]"
-                  :key="col.key"
-                  :class="[
-                    'px-4 py-2.5 text-left font-medium whitespace-nowrap cursor-pointer hover:text-slate-600 select-none',
-                    col.key === 'Ticker' ? 'sticky left-0 z-10 bg-white' : '',
-                    col.key === 'name'   ? 'hidden sm:table-cell' : '',
-                  ]"
-                  @click="toggleSort(col.key as SortKey)"
-                >
-                  {{ col.label }}
-                  <span class="ml-0.5 text-[9px]">
-                    {{ sortKey === col.key ? (sortDir === 'asc' ? '▲' : '▼') : '⇅' }}
-                  </span>
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-50">
-              <tr
-                v-for="row in (sortedRows as PvtHolding[])"
-                :key="`${row.Ticker}-${row['Account Number']}`"
-                class="group hover:bg-slate-50 transition-colors"
-              >
-                <td class="sticky left-0 z-10 bg-white group-hover:bg-slate-50 transition-colors px-4 py-3 whitespace-nowrap">
-                  <span class="font-mono text-xs font-semibold text-slate-700">
-                    {{ row.Ticker || row.Symbol }}
-                  </span>
-                </td>
-                <td class="hidden sm:table-cell px-4 py-3 max-w-[180px]">
-                  <span class="text-slate-600 text-xs truncate block" :title="row.name ?? row.Description ?? ''">
-                    {{ row.name || row.Description || '—' }}
-                  </span>
-                </td>
-                <td class="px-4 py-3 text-right tabular-nums text-slate-700 whitespace-nowrap">{{ fQty(row.Quantity) }}</td>
-                <td class="px-4 py-3 text-right tabular-nums text-slate-600 whitespace-nowrap">{{ fPrice(row['Cost Basis'], row.currency) }}</td>
-                <td class="px-4 py-3 text-right tabular-nums font-medium text-slate-900 whitespace-nowrap">{{ fPrice(row.lastPrice, row.currency) }}</td>
-                <td class="px-4 py-3 text-right tabular-nums font-semibold text-slate-900 whitespace-nowrap">{{ fPrice(row.currentValue, row.currency) }}</td>
-                <td :class="['px-4 py-3 text-right tabular-nums font-medium whitespace-nowrap', gainClass(row.dayGain)]">{{ fSigned(row.dayGain, row.currency) }}</td>
-                <td :class="['px-4 py-3 text-right tabular-nums font-medium whitespace-nowrap', gainClass(row.dayGainPct)]">{{ fPct(row.dayGainPct) }}</td>
-                <td :class="['px-4 py-3 text-right tabular-nums font-medium whitespace-nowrap', gainClass(row.totalGain)]">{{ fSigned(row.totalGain, row.currency) }}</td>
-                <td :class="['px-4 py-3 text-right tabular-nums font-medium whitespace-nowrap', gainClass(row.totalGainPct)]">{{ fPct(row.totalGainPct) }}</td>
-              </tr>
-            </tbody>
-
-            <!-- Totals row -->
-            <tfoot v-if="s" class="border-t-2 border-slate-200 bg-slate-50">
-              <tr class="text-sm font-semibold">
-                <td class="px-4 py-3 text-slate-500 text-xs uppercase tracking-wide" colspan="3">Totals</td>
                 <td class="px-4 py-3 text-right tabular-nums text-slate-700">{{ fPrice(s.totalCost, currency) }}</td>
                 <td class="px-4 py-3" />
                 <td class="px-4 py-3 text-right tabular-nums text-slate-900">{{ fPrice(s.totalValue, currency) }}</td>

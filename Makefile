@@ -1,5 +1,6 @@
 VENV_BIN=/home/avinash/ainvest/.venv/bin
 APP_PATH=/home/avinash/ainvest/app
+PORT=8080
 IMAGE=ainvest
 PROJECT_ID=ainvest
 REGION=us-central1
@@ -20,7 +21,7 @@ dev_:
 
 srv:
 	uv run dotenv run uvicorn app.server.main:app \
-	--host 0.0.0.0 --port 8080 \
+	--host 0.0.0.0 --port $(PORT) \
 	--reload --log-level debug
 	# --workers 2 
 
@@ -55,7 +56,7 @@ run: d-stop d-rm d-run
 d-run:
 	make d-rm || true ;\
 	docker run -it\
-		-p 8080:8080 --name ${SERVICE_NAME} \
+		-p 8080:$(PORT) --name ${SERVICE_NAME} \
 		--env-file .env_docker --env PYTHONPATH="/app"\
 		${IMAGE_NAME} 
 # --env PYTHONPATH=".:./app" \

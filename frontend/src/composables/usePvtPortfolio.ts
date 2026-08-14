@@ -12,8 +12,7 @@
  */
 
 import { ref, watch, onUnmounted, type Ref } from 'vue'
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api'
+import { useBackend } from '@/composables/useBackend'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -70,14 +69,16 @@ export function usePvtPortfolio(
   const error   = ref<string | null>(null)
   let   timer: ReturnType<typeof setInterval> | null = null
 
+  const { get } = useBackend()
+
   async function load() {
     if (!email.value) return
     loading.value = !data.value
     error.value   = null
     try {
-      const res = await fetch(`${API_BASE}/users/${encodeURIComponent(email.value)}/pvt_pf`)
-      if (!res.ok) throw new Error(`Server error ${res.status}`)
-      const raw = await res.json() as unknown as { rows: unknown[]; summary: unknown }
+      const raw = await get<{ rows: unknown[]; summary: unknown }>(
+        `/users/${encodeURIComponent(email.value)}/pvt_pf`,
+      )
       data.value = {
         rows: raw.rows as PvtHolding[],
         summary: raw.summary as PvtSummary,

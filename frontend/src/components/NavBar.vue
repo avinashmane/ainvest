@@ -45,9 +45,10 @@ interface NavLink {
 }
 
 const NAV_LINKS: NavLink[] = [
-  { label: 'Home',         to: '/home',       icon: HomeIcon,       external: false },
-  { label: 'Quotes',       to: '/quotes',     icon: SearchIcon,     external: false },
-  { label: 'My Portfolio', to: '/portfolio',  icon: BriefcaseIcon,  external: false },
+  { label: 'Home',         to: '/home',           icon: HomeIcon,       external: false },
+  { label: 'Quotes',       to: '/quotes',         icon: SearchIcon,     external: false },
+  { label: 'Portfolio',    to: '/portfolio',      icon: BriefcaseIcon,  external: false },
+  { label: 'My Portfolio', to: '/pvt-portfolio',  icon: BriefcaseIcon,  external: false },
 ]
 
 function isActive(link: NavLink): boolean {

@@ -14,7 +14,8 @@ const auth = useAuthStore()
 const router = useRouter()
 
 const quickLinks = [
-  { label: 'Portfolio',    icon: ChartLineIcon, desc: 'View holdings & P&L',     href: '/portfolio',         color: 'text-blue-600',   internal: true },
+  { label: 'Portfolio',    icon: ChartLineIcon, desc: 'View public portfolio',    href: '/portfolio',         color: 'text-blue-600',   internal: true },
+  { label: 'My Portfolio', icon: ChartLineIcon, desc: 'View private holdings & P&L', href: '/pvt-portfolio', color: 'text-indigo-600', internal: true },
   { label: 'Transactions', icon: ArrowsHIcon,   desc: 'Buy & sell stocks',       href: '/transactions', color: 'text-green-600',  internal: false },
   { label: 'Leaderboard',  icon: TrophyIcon,    desc: 'See how you rank',        href: '/leaderboard',        color: 'text-yellow-500', internal: false },
   { label: 'Quotes',       icon: SearchIcon,    desc: 'Live Yahoo Finance data', href: '/quotes',                                                       color: 'text-violet-600', internal: true  },
